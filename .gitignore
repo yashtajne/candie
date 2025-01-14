@@ -1,0 +1,13 @@
+.venv
+
+build/
+candie.kit.egg-info/
+
+__pycache__/
+
+
+tests/
+testsdebug/
+dist/
+
+candie.txt
