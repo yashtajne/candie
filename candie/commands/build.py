@@ -3,18 +3,16 @@ import os
 
 from ..paths import *
 from ..config import Package, get_proj_config, read_package_config
-from ..utils import zig_link, get_src_files
+from ..utils import zig_link, get_src_files, check_valid_proj_and_zig_installed
 
 
 # Builds the project
 def build_proj():
 
-    if not os.path.exists(PROJ_CONFIG_FILE):
-        print("Project configuration file not found.")
+    if not check_valid_proj_and_zig_installed():
         return
     
     proj_config = get_proj_config()
-
 
     cflags: list[str] = []
     libs: list[str] = []

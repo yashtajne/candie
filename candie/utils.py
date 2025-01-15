@@ -3,6 +3,7 @@ import json
 import pathlib
 import subprocess
 
+
 from .paths import *
 
 # Runs vcpgk install <package> command
@@ -128,3 +129,20 @@ def get_src_files() -> list[str]:
                 src_files.append(file.absolute())
 
     return src_files
+
+
+
+# Checks if the project directory contains the project config file and zig is installed
+# Returns: True if project is valid and zig is installed else False
+def check_valid_proj_and_zig_installed() -> bool:
+    
+    if not os.path.exists(PROJ_CONFIG_FILE):
+        print("Project config file not found")    
+        return False
+
+    try:
+        ver = subprocess.run(["zig", "version"], capture_output=True, text=True)
+        pass
+    except FileNotFoundError as e:
+        print("Error: zig is not installed")
+        return False

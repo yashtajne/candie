@@ -2,7 +2,7 @@ import json
 
 from ..paths import *
 from ..config import get_proj_config, read_package_config, Package
-from ..utils import zig_compile, zig_link, get_object_files, get_src_files
+from ..utils import zig_compile, zig_link, get_object_files, get_src_files, check_valid_proj_and_zig_installed
 
 
 # Makes an executable file
@@ -10,8 +10,7 @@ from ..utils import zig_compile, zig_link, get_object_files, get_src_files
 # links all the object files in to an executable
 def make_app() -> None:
 
-    if not os.path.exists(PROJ_CONFIG_FILE):
-        print("Project configuration file not found.")
+    if not check_valid_proj_and_zig_installed():
         return
 
     proj_config = get_proj_config()
