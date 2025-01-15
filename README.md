@@ -7,8 +7,17 @@ A simple build tool for C/C++ projects that eliminates the need of using Makefil
 > It needs `zig` and `vcpkg` installed in  your system. If not installed most of its features wont work.
 
 
+### Installation
+
+Run this command in you terminal, to install using the python pip package manager.
+
+```sh
+pip install candie.kit
+```
+
 ### What it does.
 
+In the project directory.
 + It keeps track of source (.c, .cpp) files.
 + Recompiles the files that has been modified or newly added.
 + Caches the files which has been compiled so it does not have to compile it again if its not modified.
