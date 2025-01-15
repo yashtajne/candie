@@ -44,8 +44,7 @@ The `candie create <project_name>` will create the project in the directory wher
 └── candie-proj.conf   # Config file
 ```
 
-You can create .c and .cpp files in the src dir. but all these files should be in the src dir only. It cant have sub-directories.  
-You can put header files in seperate directory inside of the src directory but not the .c and .cpp files.
+You can create .c and .cpp files in the src directory.
 
 ### Make & Run.
 
