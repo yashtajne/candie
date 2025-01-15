@@ -128,23 +128,3 @@ def get_src_files() -> list[str]:
                 src_files.append(file.absolute())
 
     return src_files
-
-
-
-def parse_package_config(contents: str):
-    info = {}
-    for line in contents.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        key, value = line.split(':', 1)
-        key = key.strip().lower()
-        value = value.strip()
-        if key == 'conflicts':
-            pass
-        elif key == 'libs' or key == 'cflags':
-            info[key] = value.split()
-        else:
-            info[key] = value
-
-    return info

@@ -55,7 +55,6 @@ def make_app() -> None:
 
 
 
-
 # Reads the log file and returns its contents
 # @returns: dict of logs
 def get_logs() -> dict:

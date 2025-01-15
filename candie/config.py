@@ -47,7 +47,7 @@ def get_proj_config() -> configparser.ConfigParser:
     return config
 
 
-# Reads a package config file and returns the package object.
+# Reads the <package>.pc file in the pkgconfig directory and returns the package object.
 # @param pc_file_path (str): filepath of the .pc file
 # @returns: Package or none if error occurs
 def read_package_config(pc_file_path: str) -> Package|None:
