@@ -123,10 +123,11 @@ def get_src_files() -> list[str]:
 
     src_files: list[str] = []
 
-    for file in pathlib.Path(DIRS["SRC_DIR"]).iterdir():
-        if file.is_file():
-            if file.suffix == '.c' or file.suffix == '.cpp':
-                src_files.append(file.absolute())
+    for file in pathlib.Path(DIRS["SRC_DIR"]).rglob("*.c"):
+        src_files.append(file.absolute())
+
+    for file in pathlib.Path(DIRS["SRC_DIR"]).rglob("*.cpp"):
+        src_files.append(file.absolute())
 
     return src_files
 
@@ -142,7 +143,8 @@ def check_valid_proj_and_zig_installed() -> bool:
 
     try:
         ver = subprocess.run(["zig", "version"], capture_output=True, text=True)
-        pass
     except FileNotFoundError as e:
         print("Error: zig is not installed")
         return False
+    else:
+        return True
