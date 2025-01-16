@@ -2,11 +2,11 @@ from setuptools import setup, find_packages
 
 setup(
     name='candie.kit',
-    version='1.0.6',
+    version='1.0.7',
     packages=find_packages(),
     py_modules=[],
     include_package_data=True,
-    install_requires=["typer"],
+    install_requires=["typer", "toml"],
     entry_points={
         'console_scripts': [
             'candie=candie.cli:candie_exec',
