@@ -38,10 +38,12 @@ def zig_compile(src_file: str, cflags: list[str]) -> None:
 # Runs the zig command to create an executable
 # @param input_files list[str]: 
 # @param target str: target of platfrom for creating the executable
-def zig_link(input_files: list[str], output_path: str, libs: list[str], cflags: list[str] = [], target: str = 'native') -> None:
+def zig_link(input_files: list[str], output_path: str, libs: list[str], cflags: list[str] = [], target: str = 'native', verbose: bool = False) -> None:
     print(f'Linking: {len(input_files)} objects | target={target}')
-    cmd = ['zig', get_compiler_type(input_files), '-target', target, *cflags, *libs, *input_files, '-o', output_path]
-    subprocess.run(cmd)
+    cmd = ['zig', get_compiler_type(input_files), '-target', target, *input_files, *cflags, *libs, '-o', output_path]
+    if verbose :
+        print("Command:", *cmd)
+    subprocess.run(" ".join(cmd), shell=True)
 
 
 # Checks if package exists in the pkg-index.json file.
@@ -109,7 +111,7 @@ def get_object_files() -> dict[str]:
     for file in pathlib.Path(DIRS["DEBUG_BIN_CACHE_DIR"]).iterdir():
         if file.is_file():
             if file.suffix == '.o':
-                o_files[file.name] = file.absolute()
+                o_files[file.name] = str(file.absolute())
 
     return o_files
 

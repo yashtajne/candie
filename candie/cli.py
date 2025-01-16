@@ -24,9 +24,9 @@ def remove(package_name: str):
 
 
 @app.command(help="Make the debug application")
-def make():
+def make(verbose: bool = typer.Option(False, "--verbose", help="Be verbose")):
     from .commands.make import make_app
-    make_app()
+    make_app(verbose)
 
 
 @app.command(help="Run the debug application")
@@ -43,7 +43,7 @@ def build():
 
 @app.command(help="Print the version")
 def version():
-    print('version: 1.0.6')
+    print('version: 1.0.8')
 
 
 def candie_exec():

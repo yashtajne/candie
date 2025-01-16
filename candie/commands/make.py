@@ -8,7 +8,7 @@ from ..utils import zig_compile, zig_link, get_object_files, get_src_files, chec
 # Makes an executable file
 # compiles all source files and cache them
 # links all the object files in to an executable
-def make_app() -> None:
+def make_app(verbose: bool = False) -> None:
 
     if not check_valid_proj_and_zig_installed():
         return
@@ -48,9 +48,7 @@ def make_app() -> None:
 
     update_logs(new_log)
 
-    zig_link([*get_object_files().values()], os.path.join(DIRS["DEBUG_BIN_OUTPUT_DIR"], proj_config.name), libs)
-
-    print('Make status: (success)')
+    zig_link([*get_object_files().values()], os.path.join(DIRS["DEBUG_BIN_OUTPUT_DIR"], proj_config.name), libs, verbose=verbose)
 
 
 
