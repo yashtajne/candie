@@ -48,7 +48,7 @@ def make_app() -> None:
 
     update_logs(new_log)
 
-    zig_link([*get_object_files().values()], os.path.join(DIRS["DEBUG_BIN_OUTPUT_DIR"], proj_config.get('Project', 'name')), libs)
+    zig_link([*get_object_files().values()], os.path.join(DIRS["DEBUG_BIN_OUTPUT_DIR"], proj_config.name), libs)
 
     print('Make status: (success)')
 

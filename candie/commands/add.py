@@ -1,8 +1,13 @@
 
 import os
+import toml
 import json
 
+from rich.prompt import Confirm
+
+
 from ..utils import get_vcpkg_root, pkg_exists, copy_directory
+from ..config import Package, read_package_config
 from ..paths import *
 
 
@@ -22,7 +27,9 @@ def add_pkg(package_name: str) -> None:
     pkg_dir_path = get_installed_pkg_dir_path(package_name)
     
     if not pkg_dir_path:
-        print("package not installed")
+        if Confirm.ask("Would you like me to install this package for you?"):
+            os.system(f'vcpkg install {package_name}')
+            add_pkg(package_name)
         return
     
     if not is_pkg_valid(pkg_dir_path):
@@ -30,6 +37,8 @@ def add_pkg(package_name: str) -> None:
         return
     
     copy_pkg(package_name, pkg_dir_path) 
+    add_pkg_to_requirements(read_package_config(os.path.join(DIRS["LIB_PKGCONFIG_DIR"], package_name + '.pc')))
+
     print('Added ', package_name)
 
 
@@ -98,3 +107,21 @@ def is_pkg_valid(package_path: str) -> bool:
         is_valid = False
 
     return is_valid
+
+
+# Adds the package to the requirements table in the project config
+# @param: Package object
+def add_pkg_to_requirements(package: Package):
+
+    with open(PROJ_CONFIG_FILE, "r") as f:
+        data = toml.load(f)
+
+    data.setdefault("requirements", {}).setdefault("package", []).append({
+        "name": package.name,
+        "description": package.description,
+        "url": package.url,
+        "version": package.version
+    })
+
+    with open(PROJ_CONFIG_FILE, "w") as f:
+        toml.dump(data, f)

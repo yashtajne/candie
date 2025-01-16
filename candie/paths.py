@@ -22,7 +22,7 @@ DIRS = {
     "DEBUG_BIN_OUTPUT_DIR": f"{cwd}/debug/bin/output"        # Debug binary output directory
 }
 
-MODIF_LOG_FILE = f"{cwd}/.candie/log-file.json"              # Log file path
-PROJ_CONFIG_FILE = f"{cwd}/candie-proj.conf"                  # Project configuration file path
+MODIF_LOG_FILE = f"{cwd}/.candie/log-file.json"               # Log file path
+PROJ_CONFIG_FILE = f"{cwd}/proj-config.toml"                  # Project configuration file path
 
 PKG_INDEX_FILE = f"{cwd}/.candie/pkg-index.json"              # Package index file path

@@ -1,5 +1,8 @@
 import os
 import json
+import toml
+import shutil
+
 
 from ..paths import *
 
@@ -31,9 +34,27 @@ def remove_pkg(package_name: str) -> None:
                 if os.path.isfile(path):
                     os.remove(path)
                 elif os.path.isdir(path):
-                    os.removedirs(path)
+                    shutil.rmtree(path)
 
-    pkg_index_data.remove(pkg)
+    # pkg_index_data.remove(pkg)
+    remove_pkg_from_requirements(package_name)
 
     with open(PKG_INDEX_FILE, 'w') as f:
         json.dump(pkg_index_data, f, indent=4)
+
+
+
+
+# Removes the package from the requirements table in the project config
+# @param: (str) Package name
+def remove_pkg_from_requirements(package_name: str) -> None:
+
+    with open(PROJ_CONFIG_FILE, "r") as f:
+        data = toml.load(f)
+
+    for pkg in data.get("requirements", {}).get("package", []):
+        if pkg["name"] == package_name:
+            data.setdefault("requirements", {}).setdefault("package", []).remove(pkg)
+
+    with open(PROJ_CONFIG_FILE, "w") as f:
+        toml.dump(data, f)

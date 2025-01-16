@@ -1,9 +1,18 @@
 import platform
-import configparser
+import toml
 
 
 from .paths import *
 
+
+class ProjectConfig():
+    def __init__(self):
+        self.name: str
+        self.description: str
+        self.version: str
+
+        self.build: list[str]
+        self.requirements: list[Package]
 
 
 class Package:
@@ -23,27 +32,39 @@ class Package:
 # @param name (str): name of the project
 # @param description (str): project description
 def create_proj_config_file(name: str, description: str = "") -> None:
-    config = configparser.ConfigParser()
 
-    config['Project'] = {
-        'name': name,
-        'description': description,
-        'version': '0.0.1',
+    config: dict = {}
+
+    config["project"] = {
+        "name": name,
+        "description": description,
+        "version": "0.0.1",
     }
 
-    config['Build'] = {
-        'native': f'{platform.machine()}-{platform.system().lower()}',
+    config["build"] = {
+        "native": f'{platform.machine()}-{platform.system().lower()}'
     }
 
-    with open(PROJ_CONFIG_FILE, 'w') as proj_config_file:
-        config.write(proj_config_file)
+    with open(PROJ_CONFIG_FILE, 'w') as f:
+        toml.dump(config, f)
 
 
 
 # @returns: project config
-def get_proj_config() -> configparser.ConfigParser:
-    config = configparser.ConfigParser()
-    config.read(PROJ_CONFIG_FILE)
+def get_proj_config() -> ProjectConfig:
+
+    config = ProjectConfig()
+
+    with open(PROJ_CONFIG_FILE, 'r') as f:
+        data = toml.load(f)
+
+    config.name = data['project']['name']
+    config.description = data['project']['description']
+    config.version = data['project']['version']
+
+    config.build = data['build'].values()
+    config.requirements = data['requirements']
+
     return config
 
 

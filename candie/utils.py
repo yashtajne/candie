@@ -6,9 +6,6 @@ import subprocess
 
 from .paths import *
 
-# Runs vcpgk install <package> command
-def vcpkg_install(package: str) -> None:
-    os.system(f'vcpkg install {package}')
 
 # @return: the root directory of vcpkg
 def get_vcpkg_root() -> str|Exception:
