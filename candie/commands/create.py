@@ -1,6 +1,6 @@
 import os
 
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Prompt
 
 
 from ..paths import *
@@ -18,8 +18,7 @@ def create_proj(project_name: str = '') -> None:
     if project_name == '':
         project_name = Prompt.ask("Please enter Project Name")
 
-    if Confirm.ask("Would you like me to add a .gitignore file?"):
-        with open('.gitignore', 'w') as f:
+    with open('.gitignore', 'w') as f:
             f.write('''
 .candie/
 build/
@@ -30,7 +29,6 @@ lib/
     
     for dir in DIRS.values():
         os.makedirs(dir, exist_ok=True)
-
     
     with open(os.path.join(DIRS["SRC_DIR"], 'main.c'), 'w') as f:
                 f.write('''
@@ -48,4 +46,4 @@ int main() {
         f.write('{}')
 
     print('Project created.')
-    print('Now, run [candie make] to compile.\nThen run the program using [candie run] command')
+    print('Run [candie make] to compile.\nThen run the program using [candie run] command')
