@@ -43,8 +43,7 @@ def build():
 
 @app.command(help="Print the version")
 def version():
-    from pkg_resources import get_distribution
-    print('version:', get_distribution('candie').version)
+    print('version: 1.0.6')
 
 
 def candie_exec():
