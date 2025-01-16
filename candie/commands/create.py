@@ -33,10 +33,8 @@ lib/
     for dir in DIRS.values():
         os.makedirs(dir, exist_ok=True)
 
-    if Confirm.ask("Would you like me to add a main.c/cpp file to the project?"):
-        file_choice = Prompt.ask("Which file should i create?\n 1: main.c\n 2: main.cpp", choices=['1', '2'])
-        if file_choice == '1':
-            with open(os.path.join(DIRS["SRC_DIR"], 'main.c'), 'w') as f:
+    
+    with open(os.path.join(DIRS["SRC_DIR"], 'main.c'), 'w') as f:
                 f.write('''
 #include<stdio.h>
 
@@ -45,22 +43,11 @@ int main() {
     return 0;
 }
 ''')
-        else:            
-            with open(os.path.join(DIRS["SRC_DIR"], 'main.cpp'), 'w') as f:
-                f.write('''
-#include<iostream>
-
-int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
-}
-''')
     
     create_proj_config_file(project_name, project_description)
 
     with open(MODIF_LOG_FILE, 'w') as f:
         f.write('{}')
-
 
     print('Project created.')
     print('Now, run [candie make] to compile.\nThen run the program using [candie run] command')
