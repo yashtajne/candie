@@ -18,8 +18,6 @@ def create_proj(project_name: str = '') -> None:
     if project_name == '':
         project_name = Prompt.ask("Please enter Project Name")
 
-    project_description = Prompt.ask("Please enter Project Description")
-
     if Confirm.ask("Would you like me to add a .gitignore file?"):
         with open('.gitignore', 'w') as f:
             f.write('''
@@ -44,7 +42,7 @@ int main() {
 }
 ''')
     
-    create_proj_config_file(project_name, project_description)
+    create_proj_config_file(project_name)
 
     with open(MODIF_LOG_FILE, 'w') as f:
         f.write('{}')
