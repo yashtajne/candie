@@ -43,7 +43,7 @@ def build():
 
 @app.command(help="Print the version")
 def version():
-    print('version: 1.0.10')
+    print('version: 1.0.11')
 
 
 def candie_exec():

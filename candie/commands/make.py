@@ -17,9 +17,10 @@ def make_app(verbose: bool = False) -> None:
     # Get project config
     proj_config = get_proj_config()
 
-
     error_occured: bool = False
     logs = get_logs()    # Logs
+
+    print(logs)
 
     # Object files and src files
     o_files: dict = get_object_files()       # object files
@@ -45,26 +46,26 @@ def make_app(verbose: bool = False) -> None:
     # and modified files will be re-compiled
     for src_path in src_files:
 
-        if not error_occured:
+        # Get the last modified time stat
+        file_last_modified = os.stat(src_path).st_mtime
 
-            # Get the last modified time stat
-            file_last_modified = os.stat(src_path).st_mtime
+        # hex encoded filename
+        cache_file = src_path.encode('utf-8').hex() + '.o'
+        
+        # if cached file is not present in cache directory
+        if cache_file not in o_files:
+            if not zig_compile(src_path, cflags): # compile the file
+                error_occured = True
+                break
+        # if file is modified
+        elif src_path in logs and logs[src_path] != file_last_modified:
+            if not zig_compile(src_path, cflags): # compile the file
+                logs[src_path] = logs[src_path]
+                error_occured = True
+                break
 
-            # hex encoded filename
-            cache_file = src_path.encode('utf-8').hex() + '.o'
-            
-            # if cached file is not present in cache directory
-            if cache_file not in o_files:
-                if not zig_compile(src_path, cflags): # compile the file
-                    error_occured = True
-
-            # if file is modified
-            elif src_path in logs and logs[src_path] != file_last_modified:
-                if not zig_compile(src_path, cflags): # compile the file
-                    error_occured = True
-            
-            # update logs dict
-            logs[src_path] = file_last_modified
+        # update logs dict
+        logs[src_path] = file_last_modified
 
 
     # Checks if the source file for the compiled object exists.
@@ -95,5 +96,6 @@ def get_logs() -> dict:
 # Ovveride the log file with new log_content
 # @param log_content (dict): new log content
 def update_logs(log_content: dict) -> None:
+    print(log_content)
     with open(MODIF_LOG_FILE, 'w') as f:
         json.dump(log_content, f, indent=2)

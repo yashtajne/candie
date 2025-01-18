@@ -3,10 +3,10 @@ import json
 import pathlib
 import subprocess
 
-from rich import print as rprint
 
 
 from .paths import *
+
 
 
 # @return: the root directory of vcpkg
@@ -37,9 +37,7 @@ def zig_compile(src_file: str, cflags: list[str]) -> bool:
     result = subprocess.run(cmd)
     
     if result.returncode != 0:
-
         return False
-    
     return True
 
 
@@ -51,7 +49,9 @@ def zig_link(input_files: list[str], output_path: str, libs: list[str], cflags: 
     cmd = ['zig', get_compiler_type(input_files), '-target', target, *input_files, *cflags, *libs, '-o', output_path]
     if verbose :
         print("Command:", *cmd)
-    subprocess.run(" ".join(cmd), shell=True, capture_output=True, text=True)    
+    result = subprocess.run(" ".join(cmd), shell=True, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(result.stderr)
 
 
 # Checks if package exists in the pkg-index.json file.
