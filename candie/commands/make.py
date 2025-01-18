@@ -17,12 +17,9 @@ def make_app(verbose: bool = False) -> None:
     # Get project config
     proj_config = get_proj_config()
 
+
     error_occured: bool = False
-
-
-    old_log = get_logs()    # old logfile data
-    new_log: dict = {}      # for updated logs
-
+    logs = get_logs()    # Logs
 
     # Object files and src files
     o_files: dict = get_object_files()       # object files
@@ -50,22 +47,24 @@ def make_app(verbose: bool = False) -> None:
 
         if not error_occured:
 
-            file_path = str(src_path)
+            # Get the last modified time stat
             file_last_modified = os.stat(src_path).st_mtime
 
-            cache_file = file_path.encode('utf-8').hex() + '.o'
+            # hex encoded filename
+            cache_file = src_path.encode('utf-8').hex() + '.o'
             
+            # if cached file is not present in cache directory
             if cache_file not in o_files:
-                if not zig_compile(file_path, cflags):
+                if not zig_compile(src_path, cflags): # compile the file
                     error_occured = True
-            if not file_path in old_log:
-                if os.path.exists(os.path.join(DIRS["DEBUG_BIN_CACHE_DIR"], cache_file)):
-                    os.remove(os.path.join(DIRS["DEBUG_BIN_CACHE_DIR"], cache_file))
-            elif file_path in old_log and old_log[file_path] != file_last_modified:
-                if not zig_compile(file_path, cflags): 
+
+            # if file is modified
+            elif src_path in logs and logs[src_path] != file_last_modified:
+                if not zig_compile(src_path, cflags): # compile the file
                     error_occured = True
             
-            new_log[file_path] = file_last_modified
+            # update logs dict
+            logs[src_path] = file_last_modified
 
 
     # Checks if the source file for the compiled object exists.
@@ -77,7 +76,7 @@ def make_app(verbose: bool = False) -> None:
 
 
     # Update the log file
-    update_logs(new_log)
+    update_logs(logs)
 
     # Link all the object files and create executable
     if not error_occured:
