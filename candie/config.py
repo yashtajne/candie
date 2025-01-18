@@ -58,12 +58,12 @@ def get_proj_config() -> ProjectConfig:
     with open(PROJ_CONFIG_FILE, 'r') as f:
         data = toml.load(f)
 
-    config.name = data['project']['name']
-    config.description = data['project']['description']
-    config.version = data['project']['version']
+    config.name = data.get('project', {}).get('name')
+    config.description = data.get('project', {}).get('description')
+    config.version = data.get('project', {}).get('version')
 
-    config.build = data['build'].values()
-    config.requirements = data['requirements']
+    config.build = list(data.get('build', {}).values())
+    config.requirements = data.get('requirements', [])
 
     return config
 

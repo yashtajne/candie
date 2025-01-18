@@ -17,6 +17,8 @@ def make_app(verbose: bool = False) -> None:
     # Get project config
     proj_config = get_proj_config()
 
+    error_occured: bool = False
+
 
     old_log = get_logs()    # old logfile data
     new_log: dict = {}      # for updated logs
@@ -45,15 +47,25 @@ def make_app(verbose: bool = False) -> None:
     # newly created files will be compiled
     # and modified files will be re-compiled
     for src_path in src_files:
-        file_path = str(src_path)
-        file_last_modified = os.stat(src_path).st_mtime
 
-        if file_path.encode('utf-8').hex() + '.o' not in o_files:
-            zig_compile(file_path, cflags)
-        elif old_log[file_path] != file_last_modified:
-            zig_compile(file_path, cflags)
-        
-        new_log[file_path] = file_last_modified
+        if not error_occured:
+
+            file_path = str(src_path)
+            file_last_modified = os.stat(src_path).st_mtime
+
+            cache_file = file_path.encode('utf-8').hex() + '.o'
+            
+            if cache_file not in o_files:
+                if not zig_compile(file_path, cflags):
+                    error_occured = True
+            if not file_path in old_log:
+                if os.path.exists(os.path.join(DIRS["DEBUG_BIN_CACHE_DIR"], cache_file)):
+                    os.remove(os.path.join(DIRS["DEBUG_BIN_CACHE_DIR"], cache_file))
+            elif file_path in old_log and old_log[file_path] != file_last_modified:
+                if not zig_compile(file_path, cflags): 
+                    error_occured = True
+            
+            new_log[file_path] = file_last_modified
 
 
     # Checks if the source file for the compiled object exists.
@@ -68,7 +80,8 @@ def make_app(verbose: bool = False) -> None:
     update_logs(new_log)
 
     # Link all the object files and create executable
-    zig_link([*get_object_files().values()], os.path.join(DIRS["DEBUG_BIN_OUTPUT_DIR"], proj_config.name), libs, verbose=verbose)
+    if not error_occured:
+        zig_link([*get_object_files().values()], os.path.join(DIRS["DEBUG_BIN_OUTPUT_DIR"], proj_config.name), libs, verbose=verbose)
 
 
 

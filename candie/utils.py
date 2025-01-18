@@ -3,6 +3,8 @@ import json
 import pathlib
 import subprocess
 
+from rich import print as rprint
+
 
 from .paths import *
 
@@ -29,10 +31,16 @@ def get_compiler_type(file: str|list[str]) -> str:
 
 # Runs the zig compile command and compiles the file
 # @param src_file (str): filepath of the source file
-def zig_compile(src_file: str, cflags: list[str]) -> None:
+def zig_compile(src_file: str, cflags: list[str]) -> bool:
     print('Compiling: ', pathlib.Path(src_file).name)
     cmd = ['zig', get_compiler_type(src_file), '-c', *cflags, src_file, '-o', os.path.join(DIRS["DEBUG_BIN_CACHE_DIR"], src_file.encode('utf-8').hex() + '.o')]
-    subprocess.run(cmd)
+    result = subprocess.run(cmd)
+    
+    if result.returncode != 0:
+
+        return False
+    
+    return True
 
 
 # Runs the zig command to create an executable
@@ -43,7 +51,7 @@ def zig_link(input_files: list[str], output_path: str, libs: list[str], cflags: 
     cmd = ['zig', get_compiler_type(input_files), '-target', target, *input_files, *cflags, *libs, '-o', output_path]
     if verbose :
         print("Command:", *cmd)
-    subprocess.run(" ".join(cmd), shell=True)
+    subprocess.run(" ".join(cmd), shell=True, capture_output=True, text=True)    
 
 
 # Checks if package exists in the pkg-index.json file.

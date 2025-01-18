@@ -33,7 +33,7 @@ def make(verbose: bool = typer.Option(False, "--verbose", help="Be verbose")):
 def run(remake: bool = typer.Option(False, "--remake", help="Recompile and run the program")):
     from .commands.run import run_prog
     run_prog(remake)
-    
+
 
 @app.command(help="Build the project")
 def build():
