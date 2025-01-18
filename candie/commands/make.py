@@ -10,21 +10,29 @@ from ..utils import zig_compile, zig_link, get_object_files, get_src_files, chec
 # links all the object files in to an executable
 def make_app(verbose: bool = False) -> None:
 
+    # validate project and requirements
     if not check_valid_proj_and_zig_installed():
         return
 
+    # Get project config
     proj_config = get_proj_config()
 
-    old_log = get_logs()
-    new_log: dict = {}
+
+    old_log = get_logs()    # old logfile data
+    new_log: dict = {}      # for updated logs
 
 
-    o_files: list[str] = get_object_files()
-    src_files: list[str] = get_src_files()
+    # Object files and src files
+    o_files: dict = get_object_files()       # object files
+    src_files: list[str] = get_src_files()   # source files
 
-    cflags: list[str] = []
-    libs: list[str] = []
 
+    # Options to provide while compiling and linking
+    cflags: list[str] = []   # Compilation flags
+    libs: list[str] = []     # Linker flags
+
+
+    # Collect cflags and libs from all package config files
     for pc_file in os.scandir(DIRS["DEBUG_LIB_PKGCONFIG_DIR"]):
         pkg: Package = read_package_config(pc_file.path)
         if pkg:
@@ -32,22 +40,34 @@ def make_app(verbose: bool = False) -> None:
             libs.append(pkg.libs.replace('\"', '').replace('${libdir}', DIRS["DEBUG_LIB_DIR"]))
 
 
-    for src_path in src_files:
 
+    # For all source files check if the file is newly created or modified.
+    # newly created files will be compiled
+    # and modified files will be re-compiled
+    for src_path in src_files:
         file_path = str(src_path)
         file_last_modified = os.stat(src_path).st_mtime
 
-        if not file_path.replace('/', '_') + '.o' in o_files:
+        if file_path.encode('utf-8').hex() + '.o' not in o_files:
             zig_compile(file_path, cflags)
         elif old_log[file_path] != file_last_modified:
             zig_compile(file_path, cflags)
-
         
         new_log[file_path] = file_last_modified
 
 
+    # Checks if the source file for the compiled object exists.
+    # if not then deletes the cached object file
+    for o_file, o_file_path in o_files.items():
+        file = bytes.fromhex(o_file.replace('.o', '')).decode('utf-8')
+        if file not in src_files:
+            os.remove(o_file_path)
+
+
+    # Update the log file
     update_logs(new_log)
 
+    # Link all the object files and create executable
     zig_link([*get_object_files().values()], os.path.join(DIRS["DEBUG_BIN_OUTPUT_DIR"], proj_config.name), libs, verbose=verbose)
 
 

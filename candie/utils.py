@@ -31,7 +31,7 @@ def get_compiler_type(file: str|list[str]) -> str:
 # @param src_file (str): filepath of the source file
 def zig_compile(src_file: str, cflags: list[str]) -> None:
     print('Compiling: ', pathlib.Path(src_file).name)
-    cmd = ['zig', get_compiler_type(src_file), '-c', *cflags, src_file, '-o', os.path.join(DIRS["DEBUG_BIN_CACHE_DIR"], src_file.replace('/', '_')+'.o')]
+    cmd = ['zig', get_compiler_type(src_file), '-c', *cflags, src_file, '-o', os.path.join(DIRS["DEBUG_BIN_CACHE_DIR"], src_file.encode('utf-8').hex() + '.o')]
     subprocess.run(cmd)
 
 
@@ -104,9 +104,9 @@ def copy_directory(src_dir, dest_dir) -> list[str]:
 
 # Reads the debug/bin/cache directory and creates a list of .o (object) files
 # Returns: The list of object file paths
-def get_object_files() -> dict[str]:
+def get_object_files() -> dict:
 
-    o_files: dict[str] = {}
+    o_files: dict = {}
 
     for file in pathlib.Path(DIRS["DEBUG_BIN_CACHE_DIR"]).iterdir():
         if file.is_file():
@@ -123,10 +123,10 @@ def get_src_files() -> list[str]:
     src_files: list[str] = []
 
     for file in pathlib.Path(DIRS["SRC_DIR"]).rglob("*.c"):
-        src_files.append(file.absolute())
+        src_files.append(str(file.absolute()))
 
     for file in pathlib.Path(DIRS["SRC_DIR"]).rglob("*.cpp"):
-        src_files.append(file.absolute())
+        src_files.append(str(file.absolute()))
 
     return src_files
 

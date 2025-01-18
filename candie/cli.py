@@ -30,10 +30,10 @@ def make(verbose: bool = typer.Option(False, "--verbose", help="Be verbose")):
 
 
 @app.command(help="Run the debug application")
-def run():
+def run(remake: bool = typer.Option(False, "--remake", help="Recompile and run the program")):
     from .commands.run import run_prog
-    run_prog()
-
+    run_prog(remake)
+    
 
 @app.command(help="Build the project")
 def build():
@@ -43,7 +43,7 @@ def build():
 
 @app.command(help="Print the version")
 def version():
-    print('version: 1.0.8')
+    print('version: 1.0.10')
 
 
 def candie_exec():
