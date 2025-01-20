@@ -87,6 +87,9 @@ def read_package_config(pc_file_path: str) -> Package|None:
             if not package.name:
                 print("Error (not a package): package name not found in config file")
                 return None
+            
+            package.name = os.path.basename(pc_file_path).removesuffix('.pc')
+
             return package
     except Exception as e:
         print(f"Error reading pc file: {e}")
