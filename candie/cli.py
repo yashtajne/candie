@@ -30,9 +30,12 @@ def make(verbose: bool = typer.Option(False, "--verbose", help="Be verbose")):
 
 
 @app.command(help="Run the debug application")
-def run(remake: bool = typer.Option(False, "--remake", help="Recompile and run the program")):
+def run(
+    remake: bool = typer.Option(False, "--remake", help="Recompile and run the program"),
+    show_metrics: bool = typer.Option(False, "--metrics", help="Prints usage metrics of the program")
+):
     from .commands.run import run_prog
-    run_prog(remake)
+    run_prog(remake, show_metrics)
 
 
 @app.command(help="Build the project")
@@ -43,7 +46,7 @@ def build():
 
 @app.command(help="Print the version")
 def version():
-    print('version: 1.0.11')
+    print('version: 1.1.0')
 
 
 def candie_exec():

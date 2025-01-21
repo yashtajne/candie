@@ -8,7 +8,7 @@ from ..utils import zig_compile, zig_link, get_object_files, get_src_files, chec
 # Makes an executable file
 # compiles all source files and cache them
 # links all the object files in to an executable
-def make_app(verbose: bool = False) -> None:
+def make_app(verbose: bool = False) -> bool:
 
     # validate project and requirements
     if not check_valid_proj_and_zig_installed():
@@ -20,7 +20,7 @@ def make_app(verbose: bool = False) -> None:
     error_occured: bool = False
     logs = get_logs()    # Logs
 
-    print(logs)
+    # print(logs)
 
     # Object files and src files
     o_files: dict = get_object_files()       # object files
@@ -60,7 +60,6 @@ def make_app(verbose: bool = False) -> None:
         # if file is modified
         elif src_path in logs and logs[src_path] != file_last_modified:
             if not zig_compile(src_path, cflags): # compile the file
-                logs[src_path] = logs[src_path]
                 error_occured = True
                 break
 
@@ -82,8 +81,9 @@ def make_app(verbose: bool = False) -> None:
     # Link all the object files and create executable
     if not error_occured:
         zig_link([*get_object_files().values()], os.path.join(DIRS["DEBUG_BIN_OUTPUT_DIR"], proj_config.name), libs, verbose=verbose)
+        return True
 
-
+    return False
 
 # Reads the log file and returns its contents
 # @returns: dict of logs
@@ -96,6 +96,5 @@ def get_logs() -> dict:
 # Ovveride the log file with new log_content
 # @param log_content (dict): new log content
 def update_logs(log_content: dict) -> None:
-    print(log_content)
     with open(MODIF_LOG_FILE, 'w') as f:
         json.dump(log_content, f, indent=2)

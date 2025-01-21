@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='candie.kit',
-    version='1.0.11',
+    version='1.1.0',
     packages=find_packages(),
     py_modules=[],
     include_package_data=True,
