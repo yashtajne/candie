@@ -64,6 +64,7 @@ It will just copy the include and lib files of the package from the vcpkg instal
 
 To build the project for multiple platforms. you can add more targets to the project config file [Build] table.
 
+
 ```toml
 [Project]
 name = "example-app"
@@ -71,12 +72,20 @@ description = "example project"
 version = "0.0.1"
 
 [Build]
-windows = "x86_64-windows"    # for 64 bit windows
-linux = "x86_64-linux"        # for 64 bit linux
-macos = "aarch64-macos"       # for ARM 64 macos
+flags = "-Wall -Werror"     # additional flags can be added
+targets = [
+    "x86_64-windows",       # for 64 bit windows os
+    "x86_64-linux",         # for 64 bit linux os
+    "aarch64-macos",        # for ARM 64 bit macos
+]
 
-[requirements]
-packages = []
+
+[requirements]              # this will be added by build tool
+[[requirements.package]]    # installed packages will be listed here
+name = "package-name"
+description = "package-description"
+url = "package-website-url"
+version = "package-version"
 ```
 
 
