@@ -3,11 +3,11 @@ import pkg_resources
 
 setup(
     name='candie.kit',
-    version='1.1.2',
+    version='1.1.3',
     packages=find_packages(),
     py_modules=[],
     include_package_data=True,
-    install_requires=[line.strip() for line in open('requirements.txt')],
+    install_requires=['typer', 'toml', 'psutil'],
     entry_points={
         'console_scripts': [
             'candie=candie.cli:candie_exec',
