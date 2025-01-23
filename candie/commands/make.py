@@ -101,7 +101,6 @@ def make_app(verbose: bool = False) -> bool:
             input_files=[*get_object_files().values()], 
             output_path=os.path.join(DIRS["DEBUG_BIN_OUTPUT_DIR"], proj_config['project']['name']),
             libs=libs,
-            verbose=verbose,
             additional_flags=proj_config['build']['flags']
         )
         return True
