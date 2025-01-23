@@ -4,7 +4,6 @@ import pathlib
 import subprocess
 
 
-
 from .paths import *
 
 
@@ -31,24 +30,24 @@ def get_compiler_type(file: str|list[str]) -> str:
 
 # Runs the zig compile command and compiles the file
 # @param src_file (str): filepath of the source file
-def zig_compile(src_file: str, cflags: list[str]) -> bool:
-    print('Compiling: ', pathlib.Path(src_file).name)
-    cmd = ['zig', get_compiler_type(src_file), '-c', *cflags, src_file, '-o', os.path.join(DIRS["DEBUG_BIN_CACHE_DIR"], src_file.encode('utf-8').hex() + '.o')]
-    result = subprocess.run(cmd)
+def zig_compile(src_file: str, cflags: list[str], additional_flags: str = "") -> bool:
+    print('[ compilation started ]:', pathlib.Path(src_file).name)
+    cmd = ['zig', get_compiler_type(src_file), '-c', additional_flags, *cflags, src_file, '-o', os.path.join(DIRS["DEBUG_BIN_CACHE_DIR"], src_file.encode('utf-8').hex() + '.o')]
+    result = subprocess.run(cmd, capture_output=True, text=True)
     
     if result.returncode != 0:
+        print(result.stderr)
         return False
+    print('[ compilation finished ]:', pathlib.Path(src_file).name)
     return True
 
 
 # Runs the zig command to create an executable
 # @param input_files list[str]: 
 # @param target str: target of platfrom for creating the executable
-def zig_link(input_files: list[str], output_path: str, libs: list[str], cflags: list[str] = [], target: str = 'native', verbose: bool = False) -> None:
+def zig_link(input_files: list[str], output_path: str, libs: list[str], cflags: list[str] = [], target: str = 'native', additional_flags: str = "") -> None:
     print(f'Linking: {len(input_files)} objects | target={target}')
-    cmd = ['zig', get_compiler_type(input_files), '-target', target, *input_files, *cflags, *libs, '-o', output_path]
-    if verbose :
-        print("Command:", *cmd)
+    cmd = ['zig', get_compiler_type(input_files), '-target', target, additional_flags, *input_files, *cflags, *libs, '-o', output_path]
     result = subprocess.run(" ".join(cmd), shell=True, capture_output=True, text=True)
     if result.returncode != 0:
         print(result.stderr)
@@ -145,7 +144,7 @@ def get_src_files() -> list[str]:
 def check_valid_proj_and_zig_installed() -> bool:
     
     if not os.path.exists(PROJ_CONFIG_FILE):
-        print("Project config file not found")    
+        print("Error: Project config file not found")    
         return False
 
     try:

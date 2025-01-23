@@ -1,18 +1,8 @@
-import platform
 import toml
+import platform
 
 
 from .paths import *
-
-
-class ProjectConfig():
-    def __init__(self):
-        self.name: str
-        self.description: str
-        self.version: str
-
-        self.build: list[str]
-        self.requirements: list[Package]
 
 
 class Package:
@@ -42,7 +32,8 @@ def create_proj_config_file(name: str, description: str = "") -> None:
     }
 
     config["build"] = {
-        "native": f'{platform.machine()}-{platform.system().lower()}'
+        'flags': '-Wall -g',
+        'targets': [f'{platform.machine()}-{platform.system().lower()}']
     }
 
     with open(PROJ_CONFIG_FILE, 'w') as f:
@@ -51,21 +42,9 @@ def create_proj_config_file(name: str, description: str = "") -> None:
 
 
 # @returns: project config
-def get_proj_config() -> ProjectConfig:
-
-    config = ProjectConfig()
-
+def get_proj_config() -> dict:
     with open(PROJ_CONFIG_FILE, 'r') as f:
-        data = toml.load(f)
-
-    config.name = data.get('project', {}).get('name')
-    config.description = data.get('project', {}).get('description')
-    config.version = data.get('project', {}).get('version')
-
-    config.build = list(data.get('build', {}).values())
-    config.requirements = data.get('requirements', [])
-
-    return config
+        return toml.load(f)
 
 
 # Reads the <package>.pc file in the pkgconfig directory and returns the package object.

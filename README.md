@@ -41,7 +41,7 @@ The `candie create <project_name>` will create the project in the directory wher
 │       └── output/    # Debug binary
 ├── build/             # Release binary
 ├── src/               # Source files
-└── candie-proj.conf   # Config file
+└── proj-config.toml   # Config file
 ```
 
 You can create .c and .cpp files in the src directory.

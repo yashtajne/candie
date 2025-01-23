@@ -4,7 +4,6 @@ import typer
 app = typer.Typer()
 
 
-
 @app.command(help="Create a C/C++ project")
 def create(project_name: str):
     from .commands.create import create_proj
@@ -24,18 +23,17 @@ def remove(package_name: str):
 
 
 @app.command(help="Make the debug application")
-def make(verbose: bool = typer.Option(False, "--verbose", help="Be verbose")):
+def make():
     from .commands.make import make_app
-    make_app(verbose)
+    make_app()
 
 
 @app.command(help="Run the debug application")
 def run(
     remake: bool = typer.Option(False, "--remake", help="Recompile and run the program"),
-    show_metrics: bool = typer.Option(False, "--metrics", help="Prints usage metrics of the program")
 ):
     from .commands.run import run_prog
-    run_prog(remake, show_metrics)
+    run_prog(remake)
 
 
 @app.command(help="Build the project")
@@ -46,7 +44,7 @@ def build():
 
 @app.command(help="Print the version")
 def version():
-    print('version: 1.1.0')
+    print('version: 1.1.2')
 
 
 def candie_exec():

@@ -12,7 +12,7 @@ from ..config import create_proj_config_file
 def create_proj(project_name: str = '') -> None:
 
     if os.listdir(cwd):
-        print("Error: Directory not empty!")
+        print("[bold bright_red]Error[/bold bright_red]: Directory not empty!")
         return
     
     if project_name == '':
@@ -45,5 +45,5 @@ int main() {
     with open(MODIF_LOG_FILE, 'w') as f:
         f.write('{}')
 
-    print('Project created.')
-    print('Run [candie make] to compile.\nThen run the program using [candie run] command')
+    print('[bold spring_green2]Project created.[/bold spring_green2]')
+    print('Run [hot_pink][candie make][/hot_pink] to compile.\nExecute the program using [hot_pink][candie run][/hot_pink] command')

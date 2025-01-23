@@ -24,10 +24,10 @@ def build_proj():
             libs.append(pkg.libs.replace('\"', '').replace('${libdir}', DIRS["DEBUG_LIB_DIR"]))
 
     
-    for target in proj_config.build:
+    for target in proj_config['build']['targets']:
         zig_link(
             input_files=get_src_files(), 
-            output_path=os.path.join(DIRS["BUILD_DIR"], f'{proj_config.name}-{target}'),
+            output_path=os.path.join(DIRS["BUILD_DIR"], f'{proj_config['project']['name']}-{target}'),
             cflags=cflags,
             libs=libs,
             target=target

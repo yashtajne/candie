@@ -25,7 +25,7 @@ def remove_pkg(package_name: str) -> None:
             break
 
     if not pkg_to_remove:
-        print(f"Package {package_name} is not added to this project.")
+        print(f"Error: Package {package_name} is not added to this project.")
         return
         
     for pkg_dirs in pkg.values():
@@ -41,6 +41,8 @@ def remove_pkg(package_name: str) -> None:
 
     with open(PKG_INDEX_FILE, 'w') as f:
         json.dump(pkg_index_data, f, indent=4)
+
+    print(package_name, "Package removed")
 
 
 

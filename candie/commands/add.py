@@ -5,7 +5,6 @@ import json
 
 from rich.prompt import Confirm
 
-
 from ..utils import get_vcpkg_root, pkg_exists, copy_directory
 from ..config import Package, read_package_config
 from ..paths import *
@@ -15,13 +14,13 @@ from ..paths import *
 # Adds the package to the project directory
 # @param package_name (str): Name of the package
 def add_pkg(package_name: str) -> None:
-    
+
     if not os.path.exists(PROJ_CONFIG_FILE):
-        print("Project configuration file not found.")
+        print("Error: Project configuration file not found")
         return 
 
     if pkg_exists(package_name):
-        print("Package already added!")
+        print("Error: Package already added!")
         return
     
     pkg_dir_path = get_installed_pkg_dir_path(package_name)
@@ -33,13 +32,13 @@ def add_pkg(package_name: str) -> None:
         return
     
     if not is_pkg_valid(pkg_dir_path):
-        print("Not a valid package")
+        print("Error: Not a valid package")
         return
     
     copy_pkg(package_name, pkg_dir_path) 
     add_pkg_to_requirements(read_package_config(os.path.join(DIRS["LIB_PKGCONFIG_DIR"], package_name + '.pc')))
 
-    print('Added ', package_name)
+    print('Added:', package_name, 'package')
 
 
 # Copies all the pacakge files like include and lib to the project directory path
@@ -61,7 +60,7 @@ def copy_pkg(package_name: str, package_path: str) -> None:
             if not copied_contents[-1]:
                 raise Exception("Error while copying files")
         except Exception as e:
-            print(f"Error while adding package: {e}")
+            print(f"Error (while adding package): {e}")
             print("Reverting changes, Cleaning up...")
             for copied_dir in copied_contents:
                 for file in copied_dir:
