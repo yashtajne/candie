@@ -68,7 +68,7 @@ def make_app(verbose: bool = False) -> bool:
                     target=compile_src, args=({
                         'logs': logs,
                         'file_last_modified': file_last_modified
-                    }, src_path, cflags, compile_status, proj_config['build']['flags'])
+                    }, src_path, cflags, compile_status, proj_config['debug']['Cflags'])
                 )
             )
 
@@ -99,9 +99,9 @@ def make_app(verbose: bool = False) -> bool:
     if False not in compile_status:
         zig_link(
             input_files=[*get_object_files().values()], 
-            output_path=os.path.join(DIRS["DEBUG_BIN_OUTPUT_DIR"], proj_config['project']['name']),
+            output_path=os.path.join(DIRS["DEBUG_BIN_DIR"], proj_config['project']['name']),
             libs=libs,
-            additional_flags=proj_config['build']['flags']
+            additional_flags=proj_config['debug']['Lflags']
         )
         return True
     return False

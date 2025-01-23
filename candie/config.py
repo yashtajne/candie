@@ -31,9 +31,19 @@ def create_proj_config_file(name: str, description: str = "") -> None:
         "version": "0.0.1",
     }
 
+    config["debug"] = {
+        'Cflags': "-Wall -Wextra -g",
+        'Lflags': '-Wl,--no-undefined'
+    }
+
     config["build"] = {
-        'flags': '-Wall -g',
-        'targets': [f'{platform.machine()}-{platform.system().lower()}']
+        'flags': '-Wl,--no-undefined',
+        'target': [
+            {
+                'arch': platform.machine(),
+                'os': platform.system().lower()
+            }
+        ]
     }
 
     with open(PROJ_CONFIG_FILE, 'w') as f:

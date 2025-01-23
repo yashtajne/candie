@@ -3,7 +3,7 @@ import pkg_resources
 
 setup(
     name='candie.kit',
-    version='1.1.4',
+    version='1.1.5',
     packages=find_packages(),
     py_modules=[],
     include_package_data=True,

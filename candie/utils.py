@@ -31,14 +31,14 @@ def get_compiler_type(file: str|list[str]) -> str:
 # Runs the zig compile command and compiles the file
 # @param src_file (str): filepath of the source file
 def zig_compile(src_file: str, cflags: list[str], additional_flags: str = "") -> bool:
-    print('[ compilation started ]:', pathlib.Path(src_file).name)
-    cmd = ['zig', get_compiler_type(src_file), '-c', additional_flags, *cflags, src_file, '-o', os.path.join(DIRS["DEBUG_BIN_CACHE_DIR"], src_file.encode('utf-8').hex() + '.o')]
+    print('[ compilation started ]', pathlib.Path(src_file).name)
+    cmd = ['zig', get_compiler_type(src_file), '-c', additional_flags, *cflags, src_file, '-o', os.path.join(DIRS["CACHE_DIR"], src_file.encode('utf-8').hex() + '.o')]
     result = subprocess.run(cmd, capture_output=True, text=True)
     
     if result.returncode != 0:
-        print(result.stderr)
+        print('[ compilation error ]', pathlib.Path(src_file).name, '->', result.stderr)
         return False
-    print('[ compilation finished ]:', pathlib.Path(src_file).name)
+    print('[ compilation finished ]', pathlib.Path(src_file).name)
     return True
 
 
