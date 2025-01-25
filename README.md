@@ -17,7 +17,10 @@ pip install candie.kit
 
 ### What it does.
 
-In the project directory.
+It can compile/build the project. No need of MakeFiles. It can search for all the (.c & .cpp) files the src directory of the project.
+It basically runs compile, linking commands for you.
+
+#### How it works
 + It keeps track of source (.c, .cpp) files.
 + Recompiles the files that has been modified or newly added.
 + Caches the files which has been compiled so it does not have to compile it again if its not modified.
@@ -28,17 +31,16 @@ The `candie create <project_name>` will create the project in the directory wher
 
 ```
 ├── .candie/           # Dont edit these files
-│   ├── pkg-index.json/
-│   └── log-file.json/ 
-├── include/           # Header files
+│   ├── pkg-index.json
+│   ├── pkg-index.json
+│   └── cache/ 
+├── include/           # Include files
 ├── lib/               # Libraries
 │   └── pkgconfig/
 ├── debug/
 │   ├── lib/           # Debug libraries
 │   │   └── pkgconfig/
-│   └── bin/
-│       ├── cache/     # Cached object files
-│       └── output/    # Debug binary
+│   └── bin/           # Debug binary
 ├── build/             # Release binary
 ├── src/               # Source files
 └── proj-config.toml   # Config file
@@ -62,36 +64,34 @@ It will just copy the include and lib files of the package from the vcpkg instal
 
 ### Build.
 
-To build the project for multiple platforms. you can add more targets to the project config file [Build] table.
+To build the project for multiple platforms. you can add more targets to the project config file `[Build]` table.
 
-#### Project config file `proj-config.toml`
+#### Project config file `proj-config.toml` structure
 
 ```toml
-[Project]
-name = "example-app"
-description = "example project"
+[project]
+name = "myapp"
+description = "example description"
 version = "0.0.1"
 
-                              # 👇 additional flags
-[debug]
-Cflags = "-Wall -Wextra -g"   # compiler flags
-Lflags = "-Wl,--no-undefined" # linker flags
+[debug]     # additional flags for debugging
+Cflags = [ "-Wall", "-Wextra", "-g",] # compiler flags
+Lflags = [ "-Wl,--no-undefined",] # linker flags
 
-[build]
-flags = "-Wl,--no-undefined"  # build cmd flags
+[build]     # additional flags for build release
+flags = [ "-Wl,--no-undefined",] 
 
-                              # 👇 build targets can be added like this
-[[build.target]]              
-arch = "x86_64"               # 64 bit architecture
-os = "linux"                  # for linux machine
+[[build.target]]    # for 64 bit windows machine
+arch = "x86_64"
+os = "windows"
 
-[[build.target]]              
-arch = "i686"                 # 32 bit architecture
-os = "linux"                  # for windows os
+[[build.target]]    # for 64 bit linux machine
+arch = "x86_64"
+os = "linux"
 
-[[build.target]]              
-arch = "aarch64"              # ARM 64 bit architecture
-os = "macos"                  # for mac os
+[[build.target]]    # for 64 bit ARM mac os
+arch = "aarch64"
+os = "macos"
 
 [requirements]              # this will be added by build tool you dont have to edit these
 [[requirements.package]]    # installed packages will be listed like this

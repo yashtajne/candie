@@ -3,8 +3,8 @@ import json
 import toml
 import shutil
 
-
-from ..paths import *
+from .. import console
+from ..paths import PKG_INDEX_FILE, PROJ_CONFIG_FILE
 
 # Removes all package files from the project directory
 # @param package_name (str): name of the package
@@ -25,7 +25,7 @@ def remove_pkg(package_name: str) -> None:
             break
 
     if not pkg_to_remove:
-        print(f"Error: Package {package_name} is not added to this project.")
+        console.print(f"[dim]Error[/dim] -> Package {package_name} is not added to this project.")
         return
         
     for pkg_dirs in pkg.values():
@@ -42,7 +42,7 @@ def remove_pkg(package_name: str) -> None:
     with open(PKG_INDEX_FILE, 'w') as f:
         json.dump(pkg_index_data, f, indent=4)
 
-    print(package_name, "Package removed")
+    console.print(package_name, "Package removed")
 
 
 

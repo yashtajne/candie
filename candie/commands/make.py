@@ -1,10 +1,12 @@
+import os
 import json
 
 from threading import Thread
-from rich import print as rprint
 
-from ..paths import *
-from ..config import get_proj_config, read_package_config, Package
+
+from .. import console
+from ..paths import PROJ_DIRS, MODIF_LOG_FILE
+from ..config import get_proj_config, read_pc_file, Package
 from ..utils import zig_compile, zig_link, get_object_files, get_src_files, check_valid_proj_and_zig_installed
 
 
@@ -27,7 +29,7 @@ def make_app(verbose: bool = False) -> bool:
     src_files: list[str] = get_src_files()   # source files
 
     if len(src_files) <= 0: 
-        print("Error: Didnt find any source files.")
+        console.print("[err]Error[/err] -> Empty src directory.")
         return False
 
     # Options to provide while compiling and linking
@@ -36,11 +38,11 @@ def make_app(verbose: bool = False) -> bool:
 
 
     # Collect cflags and libs from all package config files
-    for pc_file in os.scandir(DIRS["DEBUG_LIB_PKGCONFIG_DIR"]):
-        pkg: Package = read_package_config(pc_file.path)
+    for pc_file in os.scandir(PROJ_DIRS["DEBUG_LIB_PKGCONFIG_DIR"]):
+        pkg: Package = read_pc_file(pc_file.path)
         if pkg:
-            cflags.append(pkg.cflags.replace('\"', '').replace('${includedir}', DIRS["INCLUDE_DIR"]))
-            libs.append(pkg.libs.replace('\"', '').replace('${libdir}', DIRS["DEBUG_LIB_DIR"]))
+            cflags.append(pkg.cflags.replace('\"', '').replace('${includedir}', PROJ_DIRS["INCLUDE_DIR"]))
+            libs.append(pkg.libs.replace('\"', '').replace('${libdir}', PROJ_DIRS["DEBUG_LIB_DIR"]))
 
 
     # list containing threads of compile_src functions
@@ -99,7 +101,7 @@ def make_app(verbose: bool = False) -> bool:
     if False not in compile_status:
         zig_link(
             input_files=[*get_object_files().values()], 
-            output_path=os.path.join(DIRS["DEBUG_BIN_DIR"], proj_config['project']['name']),
+            output_path=os.path.join(PROJ_DIRS["DEBUG_BIN_DIR"], proj_config['project']['name']),
             libs=libs,
             additional_flags=proj_config['debug']['Lflags']
         )
@@ -110,9 +112,17 @@ def make_app(verbose: bool = False) -> bool:
 # @returns: dict of logs
 def get_logs() -> dict:
     logs: dict = {}
-    with open(MODIF_LOG_FILE, 'r') as f:
-        logs = json.load(f)
+    try:
+        with open(MODIF_LOG_FILE, 'r') as f:
+            logs = json.load(f)
+    except FileNotFoundError:
+        console.print(f"[err]Error[/err] [dim](while reading logs)[/dim] -> File '{MODIF_LOG_FILE}' not found.")
+    except json.JSONDecodeError as e:
+        console.print(f"[err]Error[/err] [dim](while reading logs)[/dim] -> Invalid JSON syntax in file '{MODIF_LOG_FILE}': {e}")
+    except Exception as e:
+        console.print(f"[err]Error[/err] -> {e}")
     return logs
+
 
 # Ovveride the log file with new log_content
 # @param log_content (dict): new log content

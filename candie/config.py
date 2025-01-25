@@ -2,6 +2,7 @@ import toml
 import platform
 
 
+from . import console
 from .paths import *
 
 
@@ -21,23 +22,23 @@ class Package:
 # writes necessary values to the config file after creating it.
 # @param name (str): name of the project
 # @param description (str): project description
-def create_proj_config_file(name: str, description: str = "") -> None:
+def create_proj_config_file(name: str) -> None:
 
     config: dict = {}
 
     config["project"] = {
         "name": name,
-        "description": description,
+        "description": "",
         "version": "0.0.1",
     }
 
     config["debug"] = {
-        'Cflags': "-Wall -Wextra -g",
-        'Lflags': '-Wl,--no-undefined'
+        'Cflags': ["-Wall", "-Wextra", "-g"],
+        'Lflags': ["-Wl,--no-undefined"]
     }
 
     config["build"] = {
-        'flags': '-Wl,--no-undefined',
+        'flags': ["-Wl,--no-undefined"],
         'target': [
             {
                 'arch': platform.machine(),
@@ -50,17 +51,59 @@ def create_proj_config_file(name: str, description: str = "") -> None:
         toml.dump(config, f)
 
 
+# def create_pkg_config_file(name: str):
+#     config: dict = {}
+
+#     config["project"] = {
+#         "name": name,
+#         "description": "",
+#         "version": "0.0.1",
+#     }
+
+#     config["debug"] = {
+#         'Cflags': "-Wall -Wextra -g",
+#         'Lflags': '-Wl,--no-undefined'
+#     }
+
+#     config["build"] = {
+#         'flags': '-lm',
+#     }
+
+#     with open(PROJ_CONFIG_FILE, 'w') as f:
+#         toml.dump(config, f)
+
 
 # @returns: project config
 def get_proj_config() -> dict:
     with open(PROJ_CONFIG_FILE, 'r') as f:
-        return toml.load(f)
+        config = toml.load(f)
+
+    return {
+        "project": {
+            "name": config.get('project', {}).get('name', 'a'),
+            "description": config.get('project', {}).get('description', ""),
+            "version": config.get('project', {}).get('version', '0.0.0'),
+        },
+        "debug": {
+            "Cflags": config.get('debug', {}).get('Cflags', []), 
+            "Lflags": config.get('debug', {}).get('Lflags', [])
+        },
+        "build": {
+            "flags": config.get('build', {}).get('flags', []),
+            "target": config.get('build', {}).get('target', [])
+        },
+        "requirements": {
+            "package": config.get('requirements', {}).get('package', [])
+        }
+    }
+
+
 
 
 # Reads the <package>.pc file in the pkgconfig directory and returns the package object.
 # @param pc_file_path (str): filepath of the .pc file
 # @returns: Package or none if error occurs
-def read_package_config(pc_file_path: str) -> Package|None:
+def read_pc_file(pc_file_path: str) -> Package|None:
     try:
         with open(pc_file_path, 'r') as file:
             package = Package()
@@ -74,12 +117,12 @@ def read_package_config(pc_file_path: str) -> Package|None:
                 if hasattr(package, key.lower()):
                     setattr(package, key.lower(), value)
             if not package.name:
-                print("Error (not a package): package name not found in config file")
+                console.print("[err]Error[/err] [dim](not a package)[/dim] -> Package name not found in config file")
                 return None
             
             package.name = os.path.basename(pc_file_path).removesuffix('.pc')
 
             return package
     except Exception as e:
-        print(f"Error reading pc file: {e}")
+        console.print(f"[err]Error[/err] [dim](while reading {pc_file_path} file)[/dim] -> {e}")
         return None

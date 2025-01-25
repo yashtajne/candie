@@ -1,9 +1,8 @@
 from setuptools import setup, find_packages
-import pkg_resources
 
 setup(
     name='candie.kit',
-    version='1.1.5',
+    version='1.1.8',
     packages=find_packages(),
     py_modules=[],
     include_package_data=True,

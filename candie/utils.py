@@ -4,15 +4,16 @@ import pathlib
 import subprocess
 
 
+from . import console
 from .paths import *
 
 
 
 # @return: the root directory of vcpkg
-def get_vcpkg_root() -> str|Exception:
+def get_vcpkg_root() -> str|None:
     vcpkg_root = os.environ.get('VCPKG_ROOT')
     if vcpkg_root is None:
-        raise Exception('VCPKG_ROOT is not set')
+        console.print("[err]Error[/err] -> $VCPKG_ROOT enviornment variable is not set.")
     return vcpkg_root
 
 
@@ -31,14 +32,14 @@ def get_compiler_type(file: str|list[str]) -> str:
 # Runs the zig compile command and compiles the file
 # @param src_file (str): filepath of the source file
 def zig_compile(src_file: str, cflags: list[str], additional_flags: str = "") -> bool:
-    print('[ compilation started ]', pathlib.Path(src_file).name)
-    cmd = ['zig', get_compiler_type(src_file), '-c', additional_flags, *cflags, src_file, '-o', os.path.join(DIRS["CACHE_DIR"], src_file.encode('utf-8').hex() + '.o')]
+    console.print('[dim][[/dim][plog]compilation started[/plog][dim]][/dim]', pathlib.Path(src_file).name)
+    cmd = ['zig', get_compiler_type(src_file), '-c', *additional_flags, *cflags, src_file, '-o', os.path.join(PROJ_DIRS["CACHE_DIR"], src_file.encode('utf-8').hex() + '.o')]
     result = subprocess.run(cmd, capture_output=True, text=True)
     
     if result.returncode != 0:
-        print('[ compilation error ]', pathlib.Path(src_file).name, '->', result.stderr)
+        console.print('[dim][[/dim][bold chartreuse2]compilation[/bold chartreuse2] [cerror]error[/cerror][dim]][/dim]', pathlib.Path(src_file).name, '->', result.stderr)
         return False
-    print('[ compilation finished ]', pathlib.Path(src_file).name)
+    console.print('[dim][[/dim][plog]compilation finished[/plog][dim]][/dim]', pathlib.Path(src_file).name)
     return True
 
 
@@ -46,8 +47,8 @@ def zig_compile(src_file: str, cflags: list[str], additional_flags: str = "") ->
 # @param input_files list[str]: 
 # @param target str: target of platfrom for creating the executable
 def zig_link(input_files: list[str], output_path: str, libs: list[str], cflags: list[str] = [], target: str = 'native', additional_flags: str = "") -> None:
-    print(f'Linking: {len(input_files)} objects | target={target}')
-    cmd = ['zig', get_compiler_type(input_files), '-target', target, additional_flags, *input_files, *cflags, *libs, '-o', output_path]
+    console.print(f'[lilog]Linking[/lilog] {len(input_files)} objects | target=[dim]{target}[/dim]')
+    cmd = ['zig', get_compiler_type(input_files), '-target', target, *additional_flags, *input_files, *cflags, *libs, '-o', output_path]
     result = subprocess.run(" ".join(cmd), shell=True, capture_output=True, text=True)
     if result.returncode != 0:
         print(result.stderr)
@@ -115,7 +116,7 @@ def get_object_files() -> dict:
 
     o_files: dict = {}
 
-    for file in pathlib.Path(DIRS["DEBUG_BIN_CACHE_DIR"]).iterdir():
+    for file in pathlib.Path(PROJ_DIRS["CACHE_DIR"]).iterdir():
         if file.is_file():
             if file.suffix == '.o':
                 o_files[file.name] = str(file.absolute())
@@ -129,10 +130,10 @@ def get_src_files() -> list[str]:
 
     src_files: list[str] = []
 
-    for file in pathlib.Path(DIRS["SRC_DIR"]).rglob("*.c"):
+    for file in pathlib.Path(PROJ_DIRS["SRC_DIR"]).rglob("*.c"):
         src_files.append(str(file.absolute()))
 
-    for file in pathlib.Path(DIRS["SRC_DIR"]).rglob("*.cpp"):
+    for file in pathlib.Path(PROJ_DIRS["SRC_DIR"]).rglob("*.cpp"):
         src_files.append(str(file.absolute()))
 
     return src_files
@@ -144,13 +145,13 @@ def get_src_files() -> list[str]:
 def check_valid_proj_and_zig_installed() -> bool:
     
     if not os.path.exists(PROJ_CONFIG_FILE):
-        print("Error: Project config file not found")    
+        console.print("[err]Error[/err] -> project config file not found")    
         return False
 
     try:
         ver = subprocess.run(["zig", "version"], capture_output=True, text=True)
     except FileNotFoundError as e:
-        print("Error: zig is not installed")
+        console.print("[err]Error[/err] -> zig is not installed")
         return False
     else:
         return True
