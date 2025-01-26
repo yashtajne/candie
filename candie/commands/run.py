@@ -1,9 +1,10 @@
 import os
+import time
 import psutil
-import subprocess
 import tkinter as tk
 
-from .. import console 
+
+from .. import console
 from .make import make_app
 from ..paths import PROJ_DIRS
 from ..config import get_proj_config
@@ -28,31 +29,55 @@ def run_prog(remake: bool, show_metrics: bool = False) -> None:
         if not make_app():
             return
 
-    # If program exists then run
     if os.path.exists(program):
+
+        process = psutil.Popen([program])
+
+        window = tk.Tk()
+        window.geometry("480x360")
+        window.resizable(False, False)
+
+        stats = tk.Label(window, justify="left")
+        stats.pack(anchor='w')
+
         if show_metrics:
-
-            process = psutil.Popen([program])
-            window = tk.Tk()
-            window.geometry("480x360")
-            window.resizable(False, False)
-
-            stats = tk.Label(window, justify="left")
-            stats.pack(anchor='w')
-
             try:
-                while process.status() not in [psutil.STATUS_STOPPED, psutil.STATUS_ZOMBIE]:
+
+                CPU_limit = proj_config["debug"]["limit"]["cpu"]
+                RAM_limit = proj_config["debug"]["limit"]["ram"]
+                Thread_limit = proj_config["debug"]["limit"]["thread"]
+
+                while process.status() not in [psutil.STATUS_STOPPED, psutil.STATUS_ZOMBIE, psutil.STATUS_DEAD]:
+                    
+                    cpu_percent = process.cpu_percent()
+
+                    mem_info = process.memory_info()
+                    rss = mem_info.rss / (1024 * 1024) # in MB
+
+                    threads = process.num_threads()
+
+                    if cpu_percent > CPU_limit and CPU_limit != 0 :
+                        console.print("\n[abort]CPU limit exceeded[/abort]")
+                        break
+                    elif rss > RAM_limit and RAM_limit != 0 :
+                        console.print("\n[abort]RAM limit exceeded[/abort]")
+                        break
+                    elif threads > Thread_limit and Thread_limit != 0 :
+                        console.print("\n[abort]Thread limit exceeded[/abort]")
+                        break
+
+                    time.sleep(0.5)
 
                     stats.config(text=f"""
     Process Name: {process.name()}
     Process ID: {process.pid}
 
-    CPU Usage: {process.cpu_percent()}%
+    CPU Usage: {cpu_percent}%
     Memory Usage: {process.memory_percent():.2f}%
-        [RSS]  {process.memory_info().rss / (1024 * 1024):.2f} MB
+        [RSS]  {rss:.2f} MB
         [VMS]  {process.memory_info().vms / (1024 * 1024):.2f} MB
     
-    Thread Count: {process.num_threads()}
+    Thread Count: {threads}
 
     Read Bytes: {process.io_counters().read_bytes / (1024 * 1024):.2f} MB
     Write Bytes: {process.io_counters().write_bytes / (1024 * 1024):.2f} MB
@@ -62,14 +87,12 @@ def run_prog(remake: bool, show_metrics: bool = False) -> None:
                     window.update()
 
             except KeyboardInterrupt:
-                console.print("\nProcess Interrupted")
+                console.print("\n[sigint]User Interrupt[/sigint]")
             except Exception as e:
                 console.print("[err]Error occured[/err] ->", e)
             finally:
-                window.quit()
                 process.kill()
-                
-        else:
-            subprocess.run([program])
+                window.quit()
+                console.print("[sigint]Process Terminated[/sigint]")
     else:
         console.print("[err]Error[/err] -> Executable not found")

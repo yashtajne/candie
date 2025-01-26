@@ -33,6 +33,11 @@ def create_proj_config_file(name: str) -> None:
     }
 
     config["debug"] = {
+        'limit': {
+            "cpu": 0,
+            "ram": 0,
+            "thread": 0,
+        },
         'Cflags': ["-Wall", "-Wextra", "-g"],
         'Lflags': ["-Wl,--no-undefined"]
     }
@@ -50,29 +55,6 @@ def create_proj_config_file(name: str) -> None:
     with open(PROJ_CONFIG_FILE, 'w') as f:
         toml.dump(config, f)
 
-
-# def create_pkg_config_file(name: str):
-#     config: dict = {}
-
-#     config["project"] = {
-#         "name": name,
-#         "description": "",
-#         "version": "0.0.1",
-#     }
-
-#     config["debug"] = {
-#         'Cflags': "-Wall -Wextra -g",
-#         'Lflags': '-Wl,--no-undefined'
-#     }
-
-#     config["build"] = {
-#         'flags': '-lm',
-#     }
-
-#     with open(PROJ_CONFIG_FILE, 'w') as f:
-#         toml.dump(config, f)
-
-
 # @returns: project config
 def get_proj_config() -> dict:
     with open(PROJ_CONFIG_FILE, 'r') as f:
@@ -85,7 +67,12 @@ def get_proj_config() -> dict:
             "version": config.get('project', {}).get('version', '0.0.0'),
         },
         "debug": {
-            "Cflags": config.get('debug', {}).get('Cflags', []), 
+            "limit": {
+                "cpu": config.get('debug', {}).get('limit', {}).get('cpu', 0),
+                "ram": config.get('debug', {}).get('limit', {}).get('ram', 0),
+                "thread": config.get('debug', {}).get('limit', {}).get('thread', 0),
+            }, 
+            "Cflags": config.get('debug', {}).get('Cflags', []),
             "Lflags": config.get('debug', {}).get('Lflags', [])
         },
         "build": {

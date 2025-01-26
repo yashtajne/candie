@@ -42,7 +42,7 @@ def remove_pkg(package_name: str) -> None:
     with open(PKG_INDEX_FILE, 'w') as f:
         json.dump(pkg_index_data, f, indent=4)
 
-    console.print(package_name, "Package removed")
+    console.print(f"[dim]{package_name}[/dim] [hinfo]Package removed[/hinfo]")
 
 
 

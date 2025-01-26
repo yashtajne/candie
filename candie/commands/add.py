@@ -36,7 +36,7 @@ def add_pkg(package_name: str) -> None:
     copy_pkg(package_name, pkg_dir_path) 
     add_pkg_to_requirements(read_pc_file(os.path.join(PROJ_DIRS["LIB_PKGCONFIG_DIR"], package_name + '.pc')))
 
-    console.print('Added:', package_name, 'package')
+    console.print(f'[hinfo]Added [dim]{package_name}[/dim] package[/hinfo]')
 
 
 # Copies all the pacakge files like include and lib to the project directory path
