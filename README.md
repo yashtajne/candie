@@ -78,6 +78,11 @@ version = "0.0.1"
 Cflags = [ "-Wall", "-Wextra", "-g",] # compiler flags
 Lflags = [ "-Wl,--no-undefined",] # linker flags
 
+[debug.limit]
+cpu = 0         # max cpu usage in percentage, keep 0 if not set
+ram = 1024      # max ram in MB, keep 0 is limit not set
+thread = 10     # max threads count, keep 0 if not set
+
 [build]     # additional flags for build release
 flags = [ "-Wl,--no-undefined",] 
 
