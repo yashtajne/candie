@@ -1,0 +1,6 @@
+.Test/
+.venv/
+.vscode/
+build/
+candie.kit.egg-info/
+Sketch
