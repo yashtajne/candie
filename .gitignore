@@ -4,3 +4,6 @@
 build/
 candie.kit.egg-info/
 Sketch
+dist/
+
+__pycache__
