@@ -5,45 +5,37 @@ import sys
 import shutil
 import json
 import pkgconfig
+import subprocess
 
 
-from . import C, PROJECT, LOGFILE, LOCAL_INSTALL_DIR
+from . import C, PROJECT, LOCAL_INSTALL_DIR, PROJECT_ROOT, NATIVE
+from .printer import Print_Error
 
 
-
-def Get_Logs() -> dict:
+def Run_Command(*cmd, dir: str = PROJECT_ROOT, shell: bool = False, capture_output: bool = False) -> subprocess.CompletedProcess:
     try:
-        if not os.path.exists(LOGFILE):
-            with open(LOGFILE, 'w') as logfile:
-                json.dump({}, logfile)
-        with open(LOGFILE, 'r') as logfile:
-            logs = json.load(logfile)
-        return logs
-    except json.JSONDecodeError:
-        pass
+        result = subprocess.run(
+            list(cmd),
+            cwd=dir,
+            shell=shell,
+            capture_output=capture_output,
+            text=True,
+            check=True
+        )
+        return result
+    except subprocess.CalledProcessError as e:
+        Print_Error(f"Command failed with return code {e.returncode}: {e.cmd}")
+        raise SystemError
 
-def Update_Logs(logs: dict) -> None:
-    try:
-        with open(LOGFILE, 'w') as logfile:
-            json.dump(logs, logfile, indent=2)
-    except Exception:
-        pass
-
-# Encode hex
-def HEX_Encode(string: str):
-    return string.encode('utf-8').hex()
-
-# Decode hex 
-def HEX_Decode(string: str):
-    return bytes.fromhex(string).decode('utf-8')
 
 # Finds the pkgconfig file of the library and returns its values.
 def Grab_Dependency(
         library_name: str,
         debug: bool = False,
+        triplet: str = NATIVE,
         dependency_dir: str = None
     ) -> (dict | None):
-    dependency_dir = LOCAL_INSTALL_DIR if dependency_dir is None else dependency_dir
+    dependency_dir = os.path.join(LOCAL_INSTALL_DIR, triplet) if dependency_dir is None else dependency_dir
     os.environ['PKG_CONFIG_PATH'] = f'{dependency_dir}{'/debug' if debug else ''}/lib/pkgconfig'
     return {
         'name': library_name,
@@ -52,17 +44,10 @@ def Grab_Dependency(
         'libs': pkgconfig.libs(library_name)
     } if pkgconfig.exists(library_name) else None
 
-# Returns a library name based on the type os library and operating system.
-def Generate_Library_Name(library_name: str, library_type: str) -> str:
-    if sys.platform.startswith('linux'):
-        os_prefix = 'lib'
-        if library_type == 'static':
-            os_suffix = '.a'
-        elif library_type == 'dynamic':
-            os_suffix = '.so'
-        else:
-            raise ValueError('Unsupported library type')
-    elif sys.platform.startswith('darwin'):
+# Returns a library name based on the type of library and operating system.
+def Generate_Library_Name(library_name: str, library_type: str, os_triplet: str) -> str:
+    os_triplet = os_triplet.lower()
+    if "darwin" in os_triplet or "macos" in os_triplet:
         os_prefix = 'lib'
         if library_type == 'static':
             os_suffix = '.a'
@@ -70,7 +55,7 @@ def Generate_Library_Name(library_name: str, library_type: str) -> str:
             os_suffix = '.dylib'
         else:
             raise ValueError('Unsupported library type')
-    elif sys.platform.startswith('win'):
+    elif "windows" in os_triplet:
         os_prefix = ''
         if library_type == 'static':
             os_suffix = '.lib'
@@ -79,10 +64,15 @@ def Generate_Library_Name(library_name: str, library_type: str) -> str:
         else:
             raise ValueError('Unsupported library type')
     else:
-        raise ValueError('Unsupported operating system')
+        os_prefix = 'lib'
+        if library_type == 'static':
+            os_suffix = '.a'
+        elif library_type == 'dynamic':
+            os_suffix = '.so'
+        else:
+            raise ValueError('Unsupported library type')
 
-    library_name = f'{os_prefix}{library_name}{os_suffix}'
-    return library_name
+    return f'{os_prefix}{library_name}{os_suffix}'
 
 # Checks if package is installed
 def Check_Package_Installed(package_name: str) -> bool:
@@ -145,20 +135,6 @@ def Copy_Files(file_paths, destination_dir: str):
         except Exception as e:
             print(f"Error copying {file_path}: {str(e)}")
 
-# Removes Cached files that are not being used
-def Remove_Invalid_Cache(cache_dir: str) -> None:
-    for root, dirs, files in os.walk(cache_dir):
-        for file in files:
-            try:
-                source_file = bytes.fromhex(file[:-2]).decode('utf-8')
-                if not os.path.exists(source_file):
-                    os.remove(os.path.join(root, file))
-            except ValueError:
-                os.remove(os.path.join(root, file))
-        for dir in dirs:
-            if not os.path.isdir(HEX_Decode(dir)):
-                shutil.rmtree(os.path.join(root, dir))
-
 def Generate_PkgConfig_File(
         name: str,
         description: str,
@@ -166,13 +142,14 @@ def Generate_PkgConfig_File(
         url: str,
         requires: list[str],
         libs: list[str],
-        cflags: list[str]        
+        cflags: list[str],
+        debug: bool = False
     ):
     return f'''
-prefix=${{pcfiledir}}/../..
+prefix=${{pcfiledir}}/../..{'/..' if debug else ''}
 exec_prefix=${{prefix}}
 includedir=${{prefix}}/include
-libdir=${{prefix}}/lib
+libdir=${{prefix}}/{'debug/lib' if debug else 'lib'}
 
 Name: {name}
 Description: {description}

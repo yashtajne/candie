@@ -9,7 +9,7 @@ app = typer.Typer()
 @app.command()
 def x(
     sec: str
-) -> None:
+) -> None:            
     execute(sec.upper())
 
 
