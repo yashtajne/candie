@@ -15,6 +15,7 @@ CANDIEFILE = f"{PROJECT_ROOT}/Candie.build"
 # Directories
 CANDIE_DIR = f"{PROJECT_ROOT}/.candie"
 LOCAL_INSTALL_DIR = f"{CANDIE_DIR}/installed"
+DOWNLOADS_DIR = f"{CANDIE_DIR}/downloads"
 CACHE_DIR = f"{CANDIE_DIR}/cache"
 
 # Project object
@@ -101,6 +102,9 @@ from .utils import (
     Grab_Sources,
     Grab_Headers,
     Grab_Dependency,
+
+    # Fetch_Content,
+    Run_Command,
 )
 
 from .genrators import Executable, Package, Library
@@ -111,6 +115,8 @@ grab_files       = Grab_Files
 grab_sources     = Grab_Sources
 grab_headers     = Grab_Headers
 grab_dependency  = Grab_Dependency
+# fetch_content    = Fetch_Contents
+run_command      = Run_Command
 
 compiler         = Compiler
 executable       = Executable
@@ -136,7 +142,9 @@ def setup() -> dict:
     
     for dir in [
         CANDIE_DIR,
-        CACHE_DIR
+        CACHE_DIR,
+        LOCAL_INSTALL_DIR,
+        DOWNLOADS_DIR
     ]:
         if not os.path.isdir(dir):
             os.makedirs(dir)

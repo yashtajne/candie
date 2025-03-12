@@ -4,15 +4,48 @@ import re
 import sys
 import shutil
 import json
+import zipfile
+import requests
 import pkgconfig
 import subprocess
 
 
-from . import C, PROJECT, LOCAL_INSTALL_DIR, PROJECT_ROOT, NATIVE
+from . import C, PROJECT, LOCAL_INSTALL_DIR, PROJECT_ROOT, NATIVE, DOWNLOADS_DIR
 from .printer import Print_Error
 
 
-def Run_Command(*cmd, dir: str = PROJECT_ROOT, shell: bool = False, capture_output: bool = False) -> subprocess.CompletedProcess:
+# New function
+def Fetch_Content(
+        url: str, 
+        place: str = DOWNLOADS_DIR
+    ):
+    print("Fetching Content...")
+    os.makedirs(os.path.join(place, "dist"), exist_ok=True)
+    with requests.get(url, stream=True) as response:
+        if response.status_code == 200:
+            content_disposition = response.headers.get("Content-Disposition")
+            if content_disposition and "filename=" in content_disposition:
+                zip_filename = content_disposition.split("filename=")[-1].strip('"')
+            else:
+                zip_filename = url.split("/")[-1]
+            zip_path = os.path.join(place, "dist", zip_filename)
+            with open(zip_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                zip_ref.extractall(place)
+            # os.remove(zip_path)
+            print(f"Content is Fetched and Placed here {place}")
+        else:
+            print(f"Failed to download file. HTTP Status Code: {response.status_code}")
+
+
+def Run_Command(
+        *cmd,
+        dir: str = PROJECT_ROOT, 
+        shell: bool = False, 
+        capture_output: bool = False
+    ) -> subprocess.CompletedProcess:
     try:
         result = subprocess.run(
             list(cmd),
