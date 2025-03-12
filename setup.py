@@ -6,7 +6,7 @@ setup(
     packages=find_packages(),
     py_modules=["main"],
     include_package_data=True,
-    install_requires=['typer', 'pkgconfig'],
+    install_requires=['typer', 'pkgconfig', 'requests'],
     entry_points={
         'console_scripts': [
             'candie=main:start',
