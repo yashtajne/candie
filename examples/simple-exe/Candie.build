@@ -1,0 +1,21 @@
+
+This Example will create an executable named 'your_project_name'
+Run candie build command to execute the build section.
+
+
+[SETUP]
+
+PROJ_NAME = 'your_project_name'
+project(
+    name = PROJ_NAME, 
+    language = C, 
+)
+
+
+[BUILD]
+
+executable(
+    PROJ_NAME,
+    './main.c',
+    './greet.c'
+).create()

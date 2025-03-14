@@ -20,8 +20,9 @@ pip install candie.kit
 ### candie CLI
 
 After installation you can run this command to get help.
+or verify that its successfully installed.
 ```
-candie . --help
+candie --help
 ```
 
 ## Getting started
@@ -37,7 +38,6 @@ So create this file for your project.
 The `Candie.build` file can contain sections of code. 
 
 A Section can be created like this [SECTION_NAME] section name should be UPPERCASE.
-
 [SETUP] is a required section.
 
 Example __Candie.build__ file 👇️
@@ -55,7 +55,7 @@ project(
 [BUILD]
 
 executable(
-    name = PROJ_NAME,
+    PROJ_NAME,
     './main.c',
     './greet.c'
 ).create()
@@ -71,7 +71,8 @@ finally, run this command to execute the build section.
 ```sh
 candie build
 ```
-This will create a executable named `'your_project_name'`
+This will create a executable named `'your_project_name'`<br>
+Here, Example project [simple-exe](./examples/simple-exe/)
 
 ## Documentation
 

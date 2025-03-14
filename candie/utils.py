@@ -10,17 +10,19 @@ import pkgconfig
 import subprocess
 
 
-from . import C, PROJECT, LOCAL_INSTALL_DIR, PROJECT_ROOT, NATIVE, DOWNLOADS_DIR
-from .printer import Print_Error
+from . import C, PROJECT, LOCAL_INSTALL_DIR, PROJECT_ROOT, NATIVE, DOWNLOADS_DIR, _GLOBAL_NAMESPACE_, parse, setup, execute
+from .printer import Print_Error, Print_Msg
 
 
-# New function
+# Download a project from remote and builds it
 def Fetch_Content(
-        url: str, 
+        url: str,
         place: str = DOWNLOADS_DIR
     ):
-    print("Fetching Content...")
+
+    Print_Msg('Fetch', f'Remote {url}')
     os.makedirs(os.path.join(place, "dist"), exist_ok=True)
+
     with requests.get(url, stream=True) as response:
         if response.status_code == 200:
             content_disposition = response.headers.get("Content-Disposition")
@@ -29,27 +31,47 @@ def Fetch_Content(
             else:
                 zip_filename = url.split("/")[-1]
             zip_path = os.path.join(place, "dist", zip_filename)
+
+            # Writing stream
             with open(zip_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
+
+            #Unarchive zip file
             with zipfile.ZipFile(zip_path, "r") as zip_ref:
                 zip_ref.extractall(place)
+
             # os.remove(zip_path)
-            print(f"Content is Fetched and Placed here {place}")
+
+            # Build file path
+            buildfile = os.path.join((content_root := os.path.join(place, os.path.splitext(zip_filename)[0])), 'Candie.build')
+
+            Print_Msg('Build', 'Starting installation')
+
+            Print_Msg('Build', 'Switching PROJECT_ROOT')
+            _GLOBAL_NAMESPACE_['PROJECT_ROOT'] = content_root
+
+            sections = parse(buildfile)
+            setup(sections)
+            execute(sections, 'BUILD')
+
+            Print_Msg('Build', 'Reverting PROJECT_ROOT')
+            _GLOBAL_NAMESPACE_['PROJECT_ROOT'] = PROJECT_ROOT
+
         else:
-            print(f"Failed to download file. HTTP Status Code: {response.status_code}")
+            Print_Error(f"Failed to download. HTTP Status Code {response.status_code}")
 
 
 def Run_Command(
         *cmd,
-        dir: str = PROJECT_ROOT, 
+        directory: str = PROJECT_ROOT, 
         shell: bool = False, 
         capture_output: bool = False
     ) -> subprocess.CompletedProcess:
     try:
         result = subprocess.run(
             list(cmd),
-            cwd=dir,
+            cwd=directory,
             shell=shell,
             capture_output=capture_output,
             text=True,
@@ -57,25 +79,25 @@ def Run_Command(
         )
         return result
     except subprocess.CalledProcessError as e:
-        Print_Error(f"Command failed with return code {e.returncode}: {e.cmd}")
+        Print_Error(f"Command failed with return code {e.returncode} {e.cmd}")
         raise SystemError
 
 
 # Finds the pkgconfig file of the library and returns its values.
 def Grab_Dependency(
-        library_name: str,
+        name: str,
         debug: bool = False,
         triplet: str = NATIVE,
-        dependency_dir: str = None
+        directory: str = None
     ) -> (dict | None):
-    dependency_dir = os.path.join(LOCAL_INSTALL_DIR, triplet) if dependency_dir is None else dependency_dir
-    os.environ['PKG_CONFIG_PATH'] = f'{dependency_dir}{'/debug' if debug else ''}/lib/pkgconfig'
+    directory = os.path.join(LOCAL_INSTALL_DIR, triplet) if directory is None else directory
+    os.environ['PKG_CONFIG_PATH'] = f'{directory}{'/debug' if debug else ''}/lib/pkgconfig'
     return {
-        'name': library_name,
+        'name': name,
         'debug': debug,
-        'cflags': pkgconfig.cflags(library_name),
-        'libs': pkgconfig.libs(library_name)
-    } if pkgconfig.exists(library_name) else None
+        'cflags': pkgconfig.cflags(name),
+        'libs': pkgconfig.libs(name)
+    } if pkgconfig.exists(name) else None
 
 # Returns a library name based on the type of library and operating system.
 def Generate_Library_Name(library_name: str, library_type: str, os_triplet: str) -> str:
@@ -107,19 +129,11 @@ def Generate_Library_Name(library_name: str, library_type: str, os_triplet: str)
 
     return f'{os_prefix}{library_name}{os_suffix}'
 
-# Checks if package is installed
-def Check_Package_Installed(package_name: str) -> bool:
-    vcpkg_info_dir = './.candie/packages/vcpkg/info'
-    if  os.path.isdir(vcpkg_info_dir):
-        if package_name in (p.split('_')[0] for p in os.listdir(vcpkg_info_dir)):
-            return True
-    return False
-
 # Grabs the files files with the provided extension from a directory
 def Grab_Files(directory_path: str, file_ext: str) -> tuple[str, ...]:  
-    source_directory_path = os.path.abspath(directory_path)
+    source_directory_path = os.path.abspath(os.path.join(_GLOBAL_NAMESPACE_.get('PROJECT_ROOT', PROJECT_ROOT), directory_path))
     return tuple(
-        str(file.path) for file in os.scandir(source_directory_path) 
+        str(file.path) for file in os.scandir(source_directory_path)
         if file.is_file() and file.name.endswith(file_ext)
     )
 

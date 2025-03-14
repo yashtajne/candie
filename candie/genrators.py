@@ -66,6 +66,8 @@ class Executable:
             l_flags=self.cflags + [lflag for lflags in self.lflags for lflag in lflags.split()]
         )
 
+        return self
+
 
 class Library:
     def __init__(self, 
@@ -137,6 +139,7 @@ class Library:
                 input_files=list(self.sources),
                 l_flags=self.cflags
             )
+
         return self
 
 
@@ -198,3 +201,5 @@ class Package:
                 libs=[('-l' + lib.name) for lib in self.libraries],
                 debug=debug
             ))
+
+        return self

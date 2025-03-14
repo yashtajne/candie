@@ -3,6 +3,8 @@ import os
 import io
 import platform
 
+from rich import print
+
 _GLOBAL_NAMESPACE_ = globals()
 
 PROJECT_ROOT = os.getcwd()
@@ -97,13 +99,47 @@ C_ARGS = [
     (STD_GNUPP23 := '-std=gnu++23'),
 ]
 
+
+
+def parse(file: str = CANDIEFILE) -> dict:
+    if not os.path.isfile(file):
+        Print_Error("Build instruction file not found.")
+        raise SystemExit
+
+    with open(file, 'r') as f:
+        data = f.read()
+    sections = re.findall(r'^\[(.*?)\](.*?)(?=^\[|\Z)', data, re.DOTALL | re.MULTILINE)
+    parsed_data = {section.strip(): content.strip() for section, content in sections}
+    return parsed_data
+
+def setup(sections: dict) -> None:
+    
+    for dir in [
+        CANDIE_DIR,
+        CACHE_DIR,
+        LOCAL_INSTALL_DIR,
+        DOWNLOADS_DIR
+    ]:
+        if not os.path.isdir(dir):
+            os.makedirs(dir)
+    
+    exec(sections["SETUP"], _GLOBAL_NAMESPACE_)
+    
+    # console.print("Sections:", sections)
+    # console.print("Project:", PROJECT)
+    
+def execute(sections: dict, option: str) -> None:
+    exec(sections[option], _GLOBAL_NAMESPACE_)
+
+
+
 from .utils import (
     Grab_Files,
     Grab_Sources,
     Grab_Headers,
     Grab_Dependency,
 
-    # Fetch_Content,
+    Fetch_Content,
     Run_Command,
 )
 
@@ -115,7 +151,7 @@ grab_files       = Grab_Files
 grab_sources     = Grab_Sources
 grab_headers     = Grab_Headers
 grab_dependency  = Grab_Dependency
-# fetch_content    = Fetch_Contents
+fetch_content    = Fetch_Content
 run_command      = Run_Command
 
 compiler         = Compiler
@@ -128,38 +164,3 @@ def project(name: str, language: str, version: str = '1.0.0') -> None:
     PROJECT['language'] = language
     PROJECT['version'] = version
     PROJECT['compiler'] = Compiler(PROJECT['language'], CACHE_DIR)
-
-def parse(file: io.TextIOWrapper) -> dict:
-    data = file.read()
-    sections = re.findall(r'^\[(.*?)\](.*?)(?=^\[|\Z)', data, re.DOTALL | re.MULTILINE)
-    parsed_data = {section.strip(): content.strip() for section, content in sections}
-    return parsed_data
-
-def setup() -> dict:
-    if not os.path.isfile(CANDIEFILE):
-        Print_Error("Build instruction file not found.")
-        raise SystemExit
-    
-    for dir in [
-        CANDIE_DIR,
-        CACHE_DIR,
-        LOCAL_INSTALL_DIR,
-        DOWNLOADS_DIR
-    ]:
-        if not os.path.isdir(dir):
-            os.makedirs(dir)
-    
-    with open(CANDIEFILE, 'r') as f:
-        sections = parse(f)
-    
-    exec(sections["SETUP"], _GLOBAL_NAMESPACE_)
-    del sections["SETUP"]
-    
-    # console.print("Sections:", sections)
-    # console.print("Project:", PROJECT)
-    
-    return sections
-
-def execute(section: str) -> None:
-    sections = setup()
-    exec(sections[section], _GLOBAL_NAMESPACE_)

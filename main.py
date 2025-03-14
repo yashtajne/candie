@@ -1,16 +1,18 @@
 import typer
 
 
-from candie import execute
+from candie import parse, setup, execute
 
 app = typer.Typer()
 
 
 @app.command()
 def x(
-    sec: str
-) -> None:            
-    execute(sec.upper())
+    option: str
+) -> None:
+    sections = parse()
+    setup(sections)
+    execute(sections, option.upper())
 
 
 def start() -> None:

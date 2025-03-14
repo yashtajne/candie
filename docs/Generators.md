@@ -7,7 +7,7 @@ There are 3 types of generators.<br>
 2. [library()](#library)
 3. [package()](#package)
 
-Executable and Package are the two main generators that you should mostly use.
+<br>
 
 ## Executable()
 
@@ -15,39 +15,25 @@ Creates an Executable file.
 
 ```py
 executable(
-    name = 'MyExe',
-    *(
-        './path/to/src/file.c'
-        './path/to/src/file.cpp'
-    ),
-    dependencies = [],
-    c_args = [],
-    link_args = [],
-    triplet = NATIVE,
-    make_out_dir = '.'
-).create(debug = False)
+    name         : str,
+    *sources     : str.
+    dependencies : list[str],
+    c_args       : list[str],
+    link_args    : list[str],
+    triplet      : NATIVE,
+    make_out_dir : PROJECT_ROOT
+)
 ```
 
-### parameters
+__name__ : Name of the executable file.<br>
+__sources__ : Source file paths.<br>
+__dependencies__ : List of dependency names.<br>
+__c_args__ : Compiler Arguments.<br>
+__link_args__ : Linker Arguments.<br>
+__triplet__ : Target platform triplet. Its NATIVE by default<br>
+__make_out_dir__ : The directory where the executable will be placed after compilation. Its set to PROJECT_ROOT by default.
 
-- `name`: name of the executable file
-
-- `dependencies`: a list of names of the packages. 
-
-- `c_args`: list of compiler arguments 
-
-- `link_args`: list of linker arguments 
-
-- `triplet`: target triplet, its NATIVE by default
-
-- `make_out_dir`: output directory
-
-### methods
-
-- `link_against(dep: Dependency)`: You can provide a dependency to link with.
-
-- `create(debug: bool = False)`: This method creates the executable.
-the `debug` param will add debugging symbols to the executable.
+<br>
 
 ## Library()
 
@@ -57,39 +43,25 @@ Creates a Library. It can either be a static archive or a shared object based of
 
 ```py
 library(
-    name = 'MyLib',
-    lib_type = STATIC,
-    *(
-        './path/to/src/file.c'
-        './path/to/src/file.cpp'
-    ),
-    dependencies = [
-        'example'
-    ],
-    c_args = [],
-    triplet = NATIVE,
-    make_out_dir = '.'
-).create()
+    name         : str,
+    lib_type     : STATIC | SHARED,
+    *sources     : str,
+    dependencies : list[str],
+    c_args       : list[str],
+    triplet      : NATIVE,
+    make_out_dir : PROJECT_ROOT
+)
 ```
 
-### parameters
+__name__ : Name of the library file.<br>
+__lib_type__ : Type of library. put `STATIC` for static and `SHARED` for dynamic.<br>
+__sources__ : Source file paths.<br>
+__dependencies__ : List of dependency names.<br>
+__c_args__ : Compiler Arguments.<br>
+__triplet__ : Target platform triplet. Its NATIVE by default<br>
+__make_out_dir__ : The directory where the library file will be placed after compilation. Its set to PROJECT_ROOT by default.
 
-- `name`: name of the library file
-
-- `dependencies`: a list of names of the packages. 
-
-- `c_args`: list of compiler arguments 
-
-- `triplet`: target triplet, its NATIVE by default
-
-- `make_out_dir`: output directory
-
-### methods
-
-- `link_against(dep: Dependency)`: You can provide a dependency to link with.
-
-- `create(debug: bool = False)`: This method creates the library.
-the `debug` param will add debugging symbols to the library.
+<br>
 
 ## Package()
 
@@ -98,47 +70,21 @@ It can generate a pkgconfig file for the libraries.
 
 ```py
 package(
-    name = 'MyPkg',
-    *(
-        library(
-            'MyLib1',
-            STATIC,
-            *grab_sources('./src1')
-        ),
-        library(
-            'MyLib2',
-            STATIC,
-            *grab_sources('./src2')
-        )
-    ),
-    triplet: str = NATIVE,
-    install_dir: str = LOCAL_INSTALL_DIR,
-    cflags: list[str] = [],
-    description: str = '',
-    version: str = '0.0.0',
-    url: str = ''
-).create(debug = True)
+    name         : str,
+    *libraries   : Library,
+    triplet      : NATIVE,
+    install_dir  : LOCAL_INSTALL_DIR,
+    cflags       : list[str],
+    description  : str,
+    version      : str,
+    url          : str
+)
 ```
-
-### parameters
-
-- `name`: name of the Package
-
-- `cflags`: Compiler flags that will be added to the pkgconfig file
-
-- `triplet`: target triplet, its NATIVE by default
-
-- `install_dir`: output directory
-
-- `description`: description of the Package
-
-- `version`: version of the Package
-
-- `url`: url of the Package
-
-
-
-### methods
-
-- `create(debug: bool = False)`: This method creates all the libraries.
-the `debug` param will add debugging symbols to the libraries.
+__name__ : Name of the package file.<br>
+__libraries__ : Libraries in the package.<br>
+__triplet__ : Target platform triplet. Its `NATIVE` by default<br>
+__install_dir__ : The directory where the libraries will be installed. its set to the projects install directory `LOCAL_INSTALL_DIR`<br>
+__cflags__ : List of compilation flags. that whould be added to the cflags label in the pkgconfig file of the package.<br>
+__description__ : Description of the package<br>
+__version__ : Version of the package.<br>
+__url__ : URL of the package.<br>
