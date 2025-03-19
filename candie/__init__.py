@@ -172,6 +172,9 @@ from .utils import (
     Grab_Headers,
     Grab_Dependency,
 
+    Copy_Directory,
+    Copy_Files,
+
     Fetch_Content,
     Run_Command,
 )
@@ -184,6 +187,10 @@ grab_files       = Grab_Files
 grab_sources     = Grab_Sources
 grab_headers     = Grab_Headers
 grab_dependency  = Grab_Dependency
+
+copy_files       = Copy_Files
+copy_directory   = Copy_Directory
+
 fetch_content    = Fetch_Content
 run_command      = Run_Command
 

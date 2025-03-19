@@ -10,8 +10,8 @@ import pkgconfig
 import subprocess
 
 
-from . import C, PROJECT, LOCAL_INSTALL_DIR, PROJECT_ROOT, NATIVE, DOWNLOADS_DIR, _GLOBAL_NAMESPACE_, parse, setup, execute
-from .printer import Print_Error, Print_Msg
+from . import C, PROJECT, LOCAL_INSTALL_DIR, PROJECT_ROOT, NATIVE, DOWNLOADS_DIR, _GLOBAL_NAMESPACE_, parse, setup, execute, Target
+from .printer import Print_Error, console
 
 
 # Download a project from remote and builds it
@@ -20,7 +20,7 @@ def Fetch_Content(
         place: str = DOWNLOADS_DIR
     ):
 
-    Print_Msg('Fetch', f'Remote {url}')
+    console.print(f'[ Downloading ] {url}')
     os.makedirs(os.path.join(place, "dist"), exist_ok=True)
 
     with requests.get(url, stream=True) as response:
@@ -45,21 +45,22 @@ def Fetch_Content(
 
             # Build file path
             buildfile = os.path.join((content_root := os.path.join(place, os.path.splitext(zip_filename)[0])), 'Candiefile')
+            
+            console.print("[ Switching ] PROJECT_ROOT")
+            console.print("[ Executing ] BUILD section")
 
-            Print_Msg('Build', 'Starting installation')
-
-            Print_Msg('Build', 'Switching PROJECT_ROOT')
             _GLOBAL_NAMESPACE_['PROJECT_ROOT'] = content_root
 
             sections = parse(buildfile)
             setup(sections)
             execute(sections, 'BUILD')
 
-            Print_Msg('Build', 'Reverting PROJECT_ROOT')
+            console.print("[ Reverting ] PROJECT_ROOT")
+
             _GLOBAL_NAMESPACE_['PROJECT_ROOT'] = PROJECT_ROOT
 
         else:
-            Print_Error(f"Failed to download. HTTP Status Code {response.status_code}")
+            Print_Error(f"failed to download. HTTP Response code {response.status_code}")
 
 
 def Run_Command(
@@ -87,10 +88,10 @@ def Run_Command(
 def Grab_Dependency(
         name: str,
         debug: bool = False,
-        triplet: str = NATIVE,
+        target: Target = NATIVE,
         directory: str = None
     ) -> (dict | None):
-    directory = os.path.join(LOCAL_INSTALL_DIR, triplet) if directory is None else directory
+    directory = os.path.join(LOCAL_INSTALL_DIR, target) if directory is None else directory
     os.environ['PKG_CONFIG_PATH'] = f'{directory}{'/debug' if debug else ''}/lib/pkgconfig'
     return {
         'name': name,
@@ -170,7 +171,7 @@ def Copy_Directory(src_dir, dest_dir) -> list[str]:
     return copied
 
 # Copy pastes files.
-def Copy_Files(file_paths, destination_dir: str):
+def Copy_Files(file_paths: list[str], destination_dir: str):
     if not os.path.exists(destination_dir):
         os.makedirs(destination_dir)
     for file_path in file_paths:
@@ -178,9 +179,9 @@ def Copy_Files(file_paths, destination_dir: str):
         destination_file_path = os.path.join(destination_dir, file_name)
         try:
             shutil.copy(file_path, destination_file_path)
-            print(f"Copied {file_path} to {destination_file_path}")
+            console.print(f"[ copied ] <{file_path}>")
         except Exception as e:
-            print(f"Error copying {file_path}: {str(e)}")
+            Print_Error(f"failed to copy <{file_path}> -> {str(e)}")
 
 def Generate_PkgConfig_File(
         name: str,
