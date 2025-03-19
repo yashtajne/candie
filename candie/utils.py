@@ -153,13 +153,13 @@ def Grab_Headers(source_directory_path: str) -> tuple[str, ...]:
         return Grab_Files(source_directory_path, '.h') + Grab_Files(source_directory_path, '.hpp')
 
 # Copies directory files from source to destination direcory
-def Copy_Directory(src_dir, dest_dir) -> list[str]:
+def Copy_Directory(source, destination) -> list[str]:
     copied: list[str] = []
-    if not os.path.exists(dest_dir):
-        os.makedirs(dest_dir)
-    for root, _, files in os.walk(src_dir):
-        rel_path = os.path.relpath(root, src_dir)
-        dest_subdir = os.path.join(dest_dir, rel_path)
+    if not os.path.exists(destination):
+        os.makedirs(destination)
+    for root, _, files in os.walk(source):
+        rel_path = os.path.relpath(root, source)
+        dest_subdir = os.path.join(destination, rel_path)
         if not os.path.exists(dest_subdir):
             os.makedirs(dest_subdir)
             copied.append(dest_subdir)
@@ -171,12 +171,12 @@ def Copy_Directory(src_dir, dest_dir) -> list[str]:
     return copied
 
 # Copy pastes files.
-def Copy_Files(file_paths: list[str], destination_dir: str):
-    if not os.path.exists(destination_dir):
-        os.makedirs(destination_dir)
-    for file_path in file_paths:
+def Copy_Files(files: list[str], directory: str):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    for file_path in files:
         file_name = os.path.basename(file_path)
-        destination_file_path = os.path.join(destination_dir, file_name)
+        destination_file_path = os.path.join(directory, file_name)
         try:
             shutil.copy(file_path, destination_file_path)
             console.print(f"[ copied ] <{file_path}>")

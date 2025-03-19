@@ -4,11 +4,14 @@
 ### List of in-built functions.<br>
 - [fetch_content](#Fetch_Content)
 - [run_command](#run_command)
+- [copy_files](#copy_files)
+- [copy_directory](#copy_directory)
 - [grab_dependency](#grab_dependency)
 - [grab_files](#grab_files)
 - [grab_sources](#grab_sources)
 - [grab_headers](#grab_headers)
 
+<br>
 
 ## Fetch_Content()
 
@@ -28,6 +31,7 @@ __@params__<br>
 __url__ : URL of the project archive.<br>
 __place__ : Directory where the archive will be placed and extracted. its set to `DOWNLOADS_DIR` by default.
 
+<br>
 
 ## Run_Command()
 
@@ -50,23 +54,60 @@ __capture_output__ : Captures output.
 __@returns__<br>
 It returns a subprocess CompletedProcess object.
 
+<br>
+
+## Copy_Files()
+
+Copies the provided list of files into a destination directory.
+
+```py
+copy_files(
+    files     : list[str]
+    directory : str
+)
+```
+
+__@params__<br>
+__files__ : List of file paths<br>
+__directory__ : Directory where the files are supposed to be pasted<br>
+
+<br>
+
+## Copy_Directory()
+
+Copies the contents of the source directory into a destination directory.
+
+```py
+copy_directory(
+    source      : str
+    destination : str
+)
+```
+
+__@params__<br>
+__source__ : Directory which will get copied<br>
+__destination__ : Directory where the contents will be pasted<br>
+
+<br>
+
 ## Grab_Dependency()
 
 Used to find and get cflags and libs of a library.
 It will search for the package in the provided directory which is `LOCAL_INSTALL_DIR` by default.
 if not found there. it will search it in the system.
 
-<!-- I have to place triplet param here -->
 ```py
 grab_dependency(
     name      : str,
     debug     : bool,
+    target    : Target,
     directory : str,
 ) -> dict
 ```
 
 __@params__<br>
 __name__ : Name of the package<br>
+__target__ : Finds for specific target<br>
 __debug__ : Find debug version of the package. its `False` by default.<br>
 __directory__ : Directory where it will search for the pkgconfig files. it is set to `LOCAL_INSTALL_DIR` by default.
 
