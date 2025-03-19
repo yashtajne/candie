@@ -1,7 +1,7 @@
 # Candie.kit
 
-A Simple C/C++ Build tool.<br>
-It Uses Zig as a drop-in compiler for compiling .c and .cpp files.
+A Simple C/C++ Build tool. which uses Zig as a drop-in compiler for compiling .c and .cpp files.
+No Build system needed, Does not generate Makefiles.
 
 ### List of contents<br>
 - [Installation](#installation)
@@ -27,20 +27,22 @@ candie --help
 
 ## Getting started
 
-Every project must contain a Build Instruction file, Named `Candie.build` and this file should always be placed in the project root directory.
+Every project must contain a Build Instruction file, Named `Candiefile` and this file should always be placed in the project root directory.
 
 project/<br>
 ├── main.c<br>
 ├── greet.c<br>
-└── Candie.build
+└── Candiefile
 
 So create this file for your project.
-The `Candie.build` file can contain sections of code. 
+The `Candiefile` file can contain sections of code. 
 
-A Section can be created like this [SECTION_NAME] section name should be UPPERCASE.
+A Section can be created like this [SECTION_NAME] 
+using square brackets,
+section name must be UPPERCASE.
 [SETUP] is a required section.
 
-Example __Candie.build__ file 👇️
+Example __Candiefile__ 👇️
 ```py
 [SETUP]
 

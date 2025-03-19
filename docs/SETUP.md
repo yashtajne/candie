@@ -6,7 +6,7 @@ The Setup section contains a required function named [__project()__](#project)
 This section always executes first.
 So you can check if the required dependecies for the project is installed or not and install them.
 
-You can create global variables in the SETUP section that can be accessed from any section of the `Candie.build` file.
+You can create global variables in the SETUP section that can be accessed from any section of the `Candiefile` file.
 
 ## project()
 ```py

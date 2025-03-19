@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
 
+
 setup(
     name='candie.kit',
-    version='1.3.0',
+    version='1.4.0',
     packages=find_packages(),
     py_modules=["main"],
     include_package_data=True,
@@ -18,10 +19,10 @@ setup(
     url='https://github.com/yashtajne/candie',
     classifiers=[
         'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
     ],
-    license='MIT License',
+    license='Apache 2.0',
     python_requires='>=3.6',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown'

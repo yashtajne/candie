@@ -17,11 +17,11 @@ Creates an Executable file.
 executable(
     name         : str,
     *sources     : str.
-    dependencies : list[str],
-    c_args       : list[str],
-    link_args    : list[str],
-    triplet      : NATIVE,
-    make_out_dir : PROJECT_ROOT
+    dependencies : list[str] = [],
+    c_args       : list[Arg] = [],
+    link_args    : list[Arg] = [],
+    target       : Target    = NATIVE,
+    make_out_dir : str       = PROJECT_ROOT
 )
 ```
 
@@ -30,7 +30,7 @@ __sources__ : Source file paths.<br>
 __dependencies__ : List of dependency names.<br>
 __c_args__ : Compiler Arguments.<br>
 __link_args__ : Linker Arguments.<br>
-__triplet__ : Target platform triplet. Its NATIVE by default<br>
+__target__ : Target platform triplet. Its NATIVE by default<br>
 __make_out_dir__ : The directory where the executable will be placed after compilation. Its set to PROJECT_ROOT by default.
 
 <br>
@@ -44,21 +44,23 @@ Creates a Library. It can either be a static archive or a shared object based of
 ```py
 library(
     name         : str,
-    lib_type     : STATIC | SHARED,
+    type         : STATIC | SHARED,
     *sources     : str,
-    dependencies : list[str],
-    c_args       : list[str],
-    triplet      : NATIVE,
-    make_out_dir : PROJECT_ROOT
+    dependencies : list[str] = [],
+    c_args       : list[Arg] = [],
+    link_args    : list[Arg] = [],
+    target       : Target    = NATIVE,
+    make_out_dir : str       = PROJECT_ROOT
 )
 ```
 
 __name__ : Name of the library file.<br>
-__lib_type__ : Type of library. put `STATIC` for static and `SHARED` for dynamic.<br>
+__type__ : Type of library. put `STATIC` for static and `SHARED` for dynamic.<br>
 __sources__ : Source file paths.<br>
 __dependencies__ : List of dependency names.<br>
 __c_args__ : Compiler Arguments.<br>
-__triplet__ : Target platform triplet. Its NATIVE by default<br>
+__link_args__ : Linker Arguments.<br>
+__target__ : Target platform triplet. Its NATIVE by default<br>
 __make_out_dir__ : The directory where the library file will be placed after compilation. Its set to PROJECT_ROOT by default.
 
 <br>
@@ -72,17 +74,17 @@ It can generate a pkgconfig file for the libraries.
 package(
     name         : str,
     *libraries   : Library,
-    triplet      : NATIVE,
-    install_dir  : LOCAL_INSTALL_DIR,
-    cflags       : list[str],
-    description  : str,
-    version      : str,
-    url          : str
+    target       : Target    = NATIVE,
+    install_dir  : str       = LOCAL_INSTALL_DIR,
+    cflags       : list[str] = [],
+    description  : str       = '',
+    version      : str       = '0.0.0',
+    url          : str       = ''
 )
 ```
 __name__ : Name of the package file.<br>
 __libraries__ : Libraries in the package.<br>
-__triplet__ : Target platform triplet. Its `NATIVE` by default<br>
+__target__ : Target platform triplet. Its `NATIVE` by default<br>
 __install_dir__ : The directory where the libraries will be installed. its set to the projects install directory `LOCAL_INSTALL_DIR`<br>
 __cflags__ : List of compilation flags. that whould be added to the cflags label in the pkgconfig file of the package.<br>
 __description__ : Description of the package<br>

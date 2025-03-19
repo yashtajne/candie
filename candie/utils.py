@@ -44,7 +44,7 @@ def Fetch_Content(
             # os.remove(zip_path)
 
             # Build file path
-            buildfile = os.path.join((content_root := os.path.join(place, os.path.splitext(zip_filename)[0])), 'Candie.build')
+            buildfile = os.path.join((content_root := os.path.join(place, os.path.splitext(zip_filename)[0])), 'Candiefile')
 
             Print_Msg('Build', 'Starting installation')
 

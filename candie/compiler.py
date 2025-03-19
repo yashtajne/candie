@@ -6,11 +6,9 @@ import threading
 from .printer import console
 
 class ZigToolchain:
-    def __init__(self, language: str, cache_dir: str):
+    def __init__(self, language: str, cache_dir):
         self.compiler = self.__get_compiler(language)
-        self.cache_dir = cache_dir
-
-        os.environ['ZIG_LOCAL_CACHE_DIR'] = self.cache_dir
+        os.environ['ZIG_LOCAL_CACHE_DIR'] = cache_dir
 
     def compile(self,
             output: str,

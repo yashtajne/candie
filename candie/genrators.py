@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 
-from . import STATIC, SHARED, PROJECT, LOCAL_INSTALL_DIR, TRIPLETS, NATIVE
+from . import STATIC, SHARED, PROJECT, LOCAL_INSTALL_DIR, NATIVE, Target, Arg
 from .utils import Generate_PkgConfig_File, Copy_Files, Grab_Dependency, Generate_Library_Name
 from .printer import Print_Error
 
@@ -12,10 +12,10 @@ class Executable:
     def __init__(self,
             name: str, 
             *sources: str,
-            dependencies: list[dict] = [],
-            c_args: list[str] = [],
-            link_args: list[str] = [],
-            triplet = NATIVE,
+            dependencies: list[str] = [],
+            c_args: list[Arg] = [],
+            link_args: list[Arg] = [],
+            target: Target = NATIVE,
             make_out_dir: str = '.',
         ):
         self.name = name
@@ -25,32 +25,51 @@ class Executable:
         self.dependencies = dependencies
 
         # Compiler arguments
-        self.cflags: list[str] = c_args
-        self.lflags: list[str] = link_args
+        self.c_args = c_args
+        self.link_args = link_args
 
-        # Triplet
-        if triplet not in TRIPLETS:
-            Print_Error(f"Invalid Triplet. ({triplet})")
-            raise SystemExit
-        self.triplet = triplet
+        if not isinstance(target, Target):
+            raise TypeError('target must be an instance of Target')
+
+        self.triplet = target
         
         # Directories
         self.make_out_dir = make_out_dir
         if not os.path.isdir(make_out_dir):
             os.makedirs(make_out_dir)
+
+    @property
+    def c_args(self):
+        return self._c_args
+
+    @c_args.setter
+    def c_args(self, value):
+        if not isinstance(value, list) or not all(isinstance(arg, Arg) for arg in value):
+            raise TypeError("c_args must be a list of Arg instances")
+        self._c_args = value
+
+    @property
+    def link_args(self):
+        return self._link_args
+
+    @link_args.setter
+    def link_args(self, value):
+        if not isinstance(value, list) or not all(isinstance(arg, Arg) for arg in value):
+            raise TypeError("link_args must be a list of Arg instances")
+        self._link_args = value
     
     def link_against(self, dependency: dict):
         if dependency:
-            self.cflags.append(dependency.get('cflags', ''))
-            self.lflags.append(dependency.get('libs', ''))
+            self.c_args.append(dependency.get('cflags', ''))
+            self.link_args.append(dependency.get('libs', ''))
         else:
-            print("Error: invalid dependency")
+            Print_Error(f"({dependency}) Dependecny not found!")
         return self
 
     def create(self, debug: bool = False):
         # Setting triplet
-        self.cflags.append('-target')
-        self.cflags.append(self.triplet)
+        self.c_args.append('-target')
+        self.c_args.append(self.triplet)
 
         # Add debugging symbols
         if debug: self.cflags.append('-g') 
@@ -63,7 +82,7 @@ class Executable:
         PROJECT['compiler'].link(
             output=f"{self.make_out_dir}/{self.name}",
             input_files=list(self.sources),
-            l_flags=self.cflags + [lflag for lflags in self.lflags for lflag in lflags.split()]
+            l_flags=self.c_args + [lflag for lflags in self.link_args for lflag in lflags.split()]
         )
 
         return self
@@ -72,22 +91,26 @@ class Executable:
 class Library:
     def __init__(self, 
             name: str, 
-            lib_type: str, 
+            type: str, 
             *sources: str,
-            dependencies: list[dict] = [],
-            c_args: list[str] = [],
-            triplet = NATIVE,
+            dependencies: list[str] = [],
+            c_args: list[Arg] = [],
+            link_args: list[Arg] = [],
+            target: Target = NATIVE,
             make_out_dir: str = '.',
         ):
         self.name = name
         self.sources = {str(Path(src).resolve()) for src in sources}
-        self.lib_type = STATIC if lib_type not in [STATIC, SHARED] else lib_type
+        
+        if type not in [SHARED, STATIC]:
+            raise TypeError("invalid library type provided")
 
-        # Triplet
-        if triplet not in TRIPLETS:
-            Print_Error(f"Invalid Triplet. ({triplet})")
-            raise SystemExit
-        self.triplet = triplet
+        self.lib_type = type
+
+        if not isinstance(target, Target):
+            raise TypeError('target must be an instance of Target')
+
+        self.triplet = target
 
         # Output directory
         self.make_out_dir = make_out_dir
@@ -99,15 +122,36 @@ class Library:
             self.link_against(dependency)
 
         # Compiler arguments
-        self.cflags: list[str] = c_args
+        self.c_args = c_args
+        self.link_args = link_args
+
+    @property
+    def c_args(self):
+        return self._c_args
+
+    @c_args.setter
+    def c_args(self, value):
+        if not isinstance(value, list) or not all(isinstance(arg, Arg) for arg in value):
+            raise TypeError("c_args must be a list of Arg instances")
+        self._c_args = value
+
+    @property
+    def link_args(self):
+        return self._link_args
+
+    @link_args.setter
+    def link_args(self, value):
+        if not isinstance(value, list) or not all(isinstance(arg, Arg) for arg in value):
+            raise TypeError("link_args must be a list of Arg instances")
+        self._link_args = value
 
     def link_against(self, dependency: dict):
         if dependency:
             self.requirements.append(dependency.get('name', ''))
-            self.cflags.append(dependency.get('cflags', ''))
-            self.lflags.append(dependency.get('libs', ''))
+            self.c_args.append(dependency.get('cflags', ''))
+            self.link_args.append(dependency.get('libs', ''))
         else:
-            print("Error: invalid dependency")
+            Print_Error(f"({dependency}) Dependecny not found!")
         return self
 
     def create(self, debug: bool = False):
@@ -119,25 +163,30 @@ class Library:
         output_path = os.path.join(libdir, Generate_Library_Name(self.name, self.lib_type, self.triplet))
 
         # setup target
-        self.cflags.append('-target')
-        self.cflags.append(self.triplet)
+        self.c_args.append('-target')
+        self.c_args.append(self.triplet)
 
         # Strip debugging symbols
-        if not debug: self.cflags.append('-fstrip')
+        if not debug and self.lib_type == STATIC:
+            self.c_args.append('-fstrip')
+        elif not debug and self.lib_type == SHARED:
+            self.c_args.append('--strip-debug')   
+        elif debug and self.lib_type == SHARED:
+            self.c_args.append('-g')
 
         # Create library file
         if self.lib_type == STATIC:
             PROJECT['compiler'].archive(
                 output=output_path,
                 input_files=list(self.sources),
-                options=self.cflags
+                options=self.c_args + [lflag for lflags in self.link_args for lflag in lflags.split()]
             )
         elif self.lib_type == SHARED:
             self.lflags.append('-shared')
             PROJECT['compiler'].link(
                 output=output_path,
                 input_files=list(self.sources),
-                l_flags=self.cflags
+                l_flags=self.c_args + [lflag for lflags in self.link_args for lflag in lflags.split()]
             )
 
         return self
@@ -147,7 +196,7 @@ class Package:
     def __init__(self, 
             name: str,
             *libraries: Library,
-            triplet: str = NATIVE,
+            target: Target = NATIVE,
             install_dir: str = LOCAL_INSTALL_DIR,
             cflags: list[str] = [],
             description: str = '',
@@ -160,11 +209,10 @@ class Package:
         self.url = url
         self.cflags = cflags
 
-        # Triplet
-        if triplet not in TRIPLETS:
-            Print_Error(f"Invalid Triplet. ({triplet})")
-            raise SystemExit
-        self.triplet = triplet
+        if not isinstance(target, Target):
+            raise TypeError('target must be an instance of Target')
+
+        self.triplet = target
 
         # Directories
         self.install_dir = os.path.join(install_dir, self.triplet)
