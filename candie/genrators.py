@@ -72,7 +72,7 @@ class Executable:
         self.c_args.append(self.triplet)
 
         # Add debugging symbols
-        if debug: self.cflags.append('-g') 
+        if debug: self.c_args.append('-g') 
 
         # Dependencies
         for dependency in self.dependencies:
